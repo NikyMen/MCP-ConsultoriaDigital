@@ -1,0 +1,18 @@
+[Unit]
+Description=MCP Consultoria Digital (FastMCP + n8n)
+After=network.target
+
+[Service]
+Type=simple
+# Ajustar usuario, ruta y venv según el VPS
+User=www-data
+WorkingDirectory=/opt/mcp-consultoria
+EnvironmentFile=/opt/mcp-consultoria/.env
+ExecStart=/opt/mcp-consultoria/.venv/bin/python /opt/mcp-consultoria/server.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:/var/log/consultoria-mcp.log
+StandardError=append:/var/log/consultoria-mcp.log
+
+[Install]
+WantedBy=multi-user.target

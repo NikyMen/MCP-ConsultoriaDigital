@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Entornos / secretos
+.env
+.env.*
+!.env.example
+
+# Datos locales
+data/leads.db
+data/leads.db-journal
+data/presupuestos/*.pdf
+!data/presupuestos/.gitkeep
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

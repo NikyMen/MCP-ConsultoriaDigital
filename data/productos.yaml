@@ -1,0 +1,214 @@
+# Catálogo editable de productos. Modificá precios, FAQs y descripciones
+# y luego hacé `git pull` + restart del servicio en el VPS.
+
+productos:
+
+  gestion_redes:
+    nombre: "Gestión de Redes Sociales"
+    keywords:
+      - redes
+      - social
+      - instagram
+      - tiktok
+      - contenido
+      - posteos
+      - reels
+      - community
+      - gestion
+      - feed
+    descripcion: >-
+      Producción integral de contenidos para redes sociales: ideamos,
+      planificamos, guionamos, grabamos, producimos, editamos y publicamos.
+      Incluye placas gráficas y contenido audiovisual. El cliente se
+      desentiende de la tarea.
+    incluye:
+      - Estrategia mensual de contenidos
+      - Producción audiovisual (grabación + edición)
+      - Diseño de placas gráficas
+      - Calendario y publicación
+      - Reportes mensuales
+    precio_desde: 0   # COMPLETAR
+    precio_moneda: "ARS"
+    precio_unidad: "mensual"
+    faqs:
+      - pregunta: "¿Cuántos posteos incluye por mes?"
+        respuesta: "Trabajamos con planes personalizados según objetivos. En general entre 8 y 20 piezas mensuales combinando reels, carruseles y placas."
+      - pregunta: "¿Ustedes graban el contenido o lo tengo que mandar yo?"
+        respuesta: "Nosotros nos encargamos de la producción audiovisual completa. Coordinamos jornadas de grabación según el plan contratado."
+      - pregunta: "¿Hay permanencia mínima?"
+        respuesta: "Recomendamos un mínimo de 3 meses para poder medir resultados, pero lo conversamos en la reunión."
+
+  pauta_meta:
+    nombre: "Pauta Publicitaria en Meta (Facebook + Instagram)"
+    keywords:
+      - pauta
+      - publicidad
+      - ads
+      - anuncios
+      - meta
+      - facebook
+      - instagram
+      - campañas
+      - campania
+      - leads
+      - factura
+      - tarjeta
+      - transferencia
+      - credito
+    descripcion: >-
+      Creamos y gestionamos campañas en Meta optimizadas para generar
+      resultados reales: visitas a la web, consultas por WhatsApp o leads.
+      Contamos con línea de crédito propia en Meta: el cliente paga por
+      transferencia y recibe Factura A, deduciendo IVA y Ganancias, sin
+      depender de la tarjeta.
+    incluye:
+      - Estrategia de campañas
+      - Creatividad y copy
+      - Carga, optimización y seguimiento
+      - Reportes de resultados
+      - Pago por transferencia con Factura A (línea de crédito propia en Meta)
+    precio_desde: 0   # COMPLETAR (fee de gestión)
+    precio_moneda: "ARS"
+    precio_unidad: "mensual + inversión publicitaria aparte"
+    faqs:
+      - pregunta: "¿Cuánto tengo que invertir mínimo en pauta?"
+        respuesta: "Depende del objetivo y la zona, pero como base sugerimos pisos para que las campañas salgan de la fase de aprendizaje. Te lo definimos en la reunión según tu rubro."
+      - pregunta: "¿Cómo es lo de la Factura A y la línea de crédito en Meta?"
+        respuesta: "Tenemos línea de crédito propia en Meta. Vos nos transferís y nosotros pagamos la pauta. Te emitimos Factura A por gestión + inversión, así deducís IVA y Ganancias y dejás de pagar con tarjeta personal."
+      - pregunta: "¿En cuánto tiempo veo resultados?"
+        respuesta: "Las campañas suelen necesitar entre 7 y 14 días para optimizarse. A partir de ahí empezás a ver resultados estables que vamos puliendo mes a mes."
+
+  crm:
+    nombre: "Automatización con CRM"
+    keywords:
+      - crm
+      - automatizacion
+      - automatización
+      - leads
+      - conversaciones
+      - centralizar
+      - whatsapp
+      - cierre
+      - ventas
+      - pipeline
+      - bot
+    descripcion: >-
+      Instalamos nuestro CRM para centralizar todas las consultas que llegan
+      desde Instagram, TikTok, web, WhatsApp y Facebook. Con automatizaciones,
+      ningún lead se queda sin respuesta y el cliente mejora sus cierres
+      porque no se le escapan oportunidades.
+    incluye:
+      - Implementación y configuración del CRM
+      - Integración de canales (IG, TikTok, web, WhatsApp, FB)
+      - Flujos de automatización
+      - Capacitación al equipo
+      - Soporte mensual
+    precio_desde: 0   # COMPLETAR
+    precio_moneda: "ARS"
+    precio_unidad: "setup + mensual"
+    faqs:
+      - pregunta: "¿Es un CRM propio o usan uno de terceros?"
+        respuesta: "Trabajamos sobre una plataforma robusta a la que sumamos nuestras automatizaciones y configuración para que quede a medida de tu operación."
+      - pregunta: "¿Puede integrarse con WhatsApp?"
+        respuesta: "Sí. Centralizamos las conversaciones de WhatsApp, Instagram, Facebook, TikTok y formularios web en un solo lugar."
+      - pregunta: "¿Quién atiende los chats: ustedes o mi equipo?"
+        respuesta: "El CRM lo opera tu equipo comercial; nosotros configuramos el sistema, las automatizaciones y los flujos para que no se les escape nada."
+
+  concilia:
+    nombre: "Concilia — Conciliación Bancaria con IA"
+    keywords:
+      - concilia
+      - conciliacion
+      - conciliación
+      - bancaria
+      - banco
+      - pagos
+      - erp
+      - administracion
+      - administración
+      - cobranzas
+      - tesoreria
+      - tesorería
+      - contabilidad
+    descripcion: >-
+      Software de conciliación bancaria con Inteligencia Artificial.
+      Reduce drásticamente la carga operativa de comprobar pagos recibidos
+      y cotejarlos con el sistema de gestión (ERP) y el banco. Personalizado
+      y vinculado al sistema del cliente.
+    incluye:
+      - Integración con bancos y ERP del cliente
+      - Reglas de matching personalizadas con IA
+      - Reportes de partidas conciliadas / pendientes
+      - Soporte
+    precio_desde: 0   # COMPLETAR
+    precio_moneda: "ARS"
+    precio_unidad: "setup + mensual"
+    faqs:
+      - pregunta: "¿Con qué bancos y ERPs se integra?"
+        respuesta: "Trabajamos con los principales bancos argentinos y los ERPs más comunes. Lo evaluamos según tu stack en la reunión."
+      - pregunta: "¿Cuánto tiempo lleva la implementación?"
+        respuesta: "Depende del volumen y la complejidad, pero los primeros resultados aparecen en las primeras semanas."
+
+  turneria:
+    nombre: "Turnería — Gestión de Turnos para Salud"
+    keywords:
+      - turnos
+      - turneria
+      - turnería
+      - agenda
+      - clinica
+      - clínica
+      - sanatorio
+      - policonsultorio
+      - medico
+      - médico
+      - paciente
+      - pacientes
+      - salud
+      - consultorio
+    descripcion: >-
+      Software de turnos para clínicas, policonsultorios, sanatorios y
+      profesionales médicos. Reduce un 95% la tarea manual de agendar,
+      revisar y confirmar turnos. Atiende 24/7, cobra la consulta por
+      adelantado, recomienda estudios y envía recordatorios.
+    incluye:
+      - Agenda 24/7 para pacientes
+      - Confirmaciones y recordatorios automáticos
+      - Cobro online de consultas
+      - Recomendaciones de estudios
+      - Panel para profesionales y secretarías
+    precio_desde: 0   # COMPLETAR
+    precio_moneda: "ARS"
+    precio_unidad: "setup + mensual"
+    faqs:
+      - pregunta: "¿Sirve para un consultorio individual o solo para clínicas?"
+        respuesta: "Funciona para ambos: desde profesionales individuales hasta policonsultorios y sanatorios con varios profesionales y consultorios."
+      - pregunta: "¿Puede cobrar la consulta por adelantado?"
+        respuesta: "Sí. Turnería permite cobrar la consulta al momento de reservar el turno, reduciendo ausentismo."
+      - pregunta: "¿Envía recordatorios por WhatsApp?"
+        respuesta: "Sí, envía recordatorios automáticos a los pacientes para confirmar o cancelar el turno."
+
+# Criterios para identificar si una persona puede ser cliente
+criterios_cliente:
+  - "Empresa o emprendedor con CUIT activo"
+  - "Empresa que ya invierte en comunicación digital o quiere empezar"
+  - "Empresa que quiere dejar de pagar pauta con tarjeta y pasar a transferencia con Factura A"
+  - "Empresa que busca automatizar procesos manuales del área administrativa o comercial"
+
+# Etapas de calificación del lead (según la consigna del negocio)
+clasificacion:
+  inicial:
+    nombre: "INICIAL"
+    descripcion: "Llegó por pauta. Aún no se identificó producto de interés."
+  producto_identificado:
+    nombre: "PRODUCTO_IDENTIFICADO"
+    descripcion: "El asistente identificó qué producto le interesa y respondió FAQs."
+  media:
+    nombre: "MEDIA"
+    descripcion: "Entregó CUIT y nombre de empresa: tenemos lo necesario para cotizar."
+  alta:
+    nombre: "ALTA"
+    descripcion: "Recibió el PDF de presupuesto y se le propuso una reunión."
+  descartado:
+    nombre: "DESCARTADO"
+    descripcion: "No cumple criterios para ser cliente (sin CUIT, fuera de alcance, etc.)."

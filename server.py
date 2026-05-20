@@ -9,10 +9,13 @@ Para conectarlo desde n8n, usar el nodo `MCP Client` con:
     URL:      http://VPS_IP:PORT/mcp/
     Header:   Authorization: Bearer <MCP_AUTH_TOKEN>
 
-NOTA importante: todos los modelos de input heredan de `LooseModel`, que
-ignora campos desconocidos (extra='ignore'). Esto es necesario porque el
-MCP Client de n8n inyecta el JSON del flujo (text, num, toolCallId, ...) en
-cada llamada de tool además de los argumentos que decide el LLM.
+NOTA importante: el MCP Client de n8n inyecta campos del flujo (text, num,
+toolCallId, ...) al MISMO nivel que `datos` en cada llamada de tool. Por eso:
+- Los modelos heredan de `LooseModel` (extra='ignore'): absorbe extras
+  metidos DENTRO de `datos`.
+- Cada función decorada con `@mcp.tool` declara `**_n8n_envelope`: absorbe
+  los extras inyectados AL LADO de `datos` (que FastMCP validaría como
+  kwargs inesperados contra la firma).
 """
 from __future__ import annotations
 
@@ -59,7 +62,7 @@ class TextoClienteInput(LooseModel):
 
 
 @mcp.tool
-def productos_disponibles() -> dict[str, Any]:
+def productos_disponibles(**_n8n_envelope) -> dict[str, Any]:
     """Lista los productos que comercializa Consultoría Digital, con claves y nombres comerciales."""
     return {
         "productos": [
@@ -71,7 +74,7 @@ def productos_disponibles() -> dict[str, Any]:
 
 
 @mcp.tool
-def info_producto(datos: ProductoKeyInput) -> dict[str, Any]:
+def info_producto(datos: ProductoKeyInput, **_n8n_envelope) -> dict[str, Any]:
     """Información detallada de un producto: nombre, descripción, qué incluye y precio desde."""
     p = catalogo.producto(datos.producto)
     if not p:
@@ -88,7 +91,7 @@ def info_producto(datos: ProductoKeyInput) -> dict[str, Any]:
 
 
 @mcp.tool
-def faqs_producto(datos: ProductoKeyInput) -> dict[str, Any]:
+def faqs_producto(datos: ProductoKeyInput, **_n8n_envelope) -> dict[str, Any]:
     """Devuelve las preguntas frecuentes y respuestas oficiales de un producto."""
     p = catalogo.producto(datos.producto)
     if not p:
@@ -97,7 +100,7 @@ def faqs_producto(datos: ProductoKeyInput) -> dict[str, Any]:
 
 
 @mcp.tool
-def identificar_producto_interes(datos: TextoClienteInput) -> dict[str, Any]:
+def identificar_producto_interes(datos: TextoClienteInput, **_n8n_envelope) -> dict[str, Any]:
     """Analiza el mensaje del lead y sugiere qué producto le interesa, en base a keywords del catálogo."""
     matches = catalogo.identificar_por_texto(datos.texto_cliente)
     return {
@@ -118,7 +121,7 @@ class CuitInput(LooseModel):
 
 
 @mcp.tool
-def validar_cuit(datos: CuitInput) -> dict[str, Any]:
+def validar_cuit(datos: CuitInput, **_n8n_envelope) -> dict[str, Any]:
     """Valida un CUIT argentino (11 dígitos + verificador). Devuelve si es válido y el formato canónico."""
     return {
         "cuit_ingresado": datos.cuit,
@@ -148,7 +151,7 @@ class RegistrarLeadInput(LooseModel):
 
 
 @mcp.tool
-def registrar_lead(datos: RegistrarLeadInput) -> dict[str, Any]:
+def registrar_lead(datos: RegistrarLeadInput, **_n8n_envelope) -> dict[str, Any]:
     """Crea o actualiza un lead (upsert por teléfono). Llamala después de cada turno relevante."""
     if datos.clasificacion and datos.clasificacion not in leads.VALIDAS:
         return {"error": f"clasificacion inválida: {datos.clasificacion}", "validas": sorted(leads.VALIDAS)}
@@ -166,7 +169,7 @@ class ClasificarLeadInput(LooseModel):
 
 
 @mcp.tool
-def clasificar_lead(datos: ClasificarLeadInput) -> dict[str, Any]:
+def clasificar_lead(datos: ClasificarLeadInput, **_n8n_envelope) -> dict[str, Any]:
     """Cambia la clasificación de un lead local y deja registro del motivo."""
     if datos.clasificacion not in leads.VALIDAS:
         return {"error": "clasificacion inválida", "validas": sorted(leads.VALIDAS)}
@@ -186,7 +189,7 @@ class TelefonoInput(LooseModel):
 
 
 @mcp.tool
-def buscar_lead(datos: TelefonoInput) -> dict[str, Any]:
+def buscar_lead(datos: TelefonoInput, **_n8n_envelope) -> dict[str, Any]:
     """Busca un lead por teléfono. Útil para que el agente recupere el estado al inicio del turno."""
     lead = leads.buscar_por_telefono(datos.telefono)
     return {"lead": lead}
@@ -198,7 +201,7 @@ class ListarLeadsInput(LooseModel):
 
 
 @mcp.tool
-def listar_leads(datos: ListarLeadsInput) -> dict[str, Any]:
+def listar_leads(datos: ListarLeadsInput, **_n8n_envelope) -> dict[str, Any]:
     """Lista los últimos leads, opcionalmente filtrando por clasificación. Uso interno."""
     return {"leads": leads.listar(clasificacion=datos.clasificacion, limit=datos.limit)}
 
@@ -222,7 +225,7 @@ class GenerarPresupuestoInput(LooseModel):
 
 
 @mcp.tool
-def generar_presupuesto(datos: GenerarPresupuestoInput) -> dict[str, Any]:
+def generar_presupuesto(datos: GenerarPresupuestoInput, **_n8n_envelope) -> dict[str, Any]:
     """Genera el PDF de presupuesto para un lead. Requisitos: empresa + CUIT cargados. Marca al lead como ALTA."""
     p = catalogo.producto(datos.producto)
     if not p:
@@ -312,13 +315,13 @@ def _kommo_safe(fn, *args, **kwargs) -> dict[str, Any]:
 
 
 @mcp.tool
-def kommo_listar_pipelines() -> dict[str, Any]:
+def kommo_listar_pipelines(**_n8n_envelope) -> dict[str, Any]:
     """Lista pipelines de Kommo con sus statuses anidados (para descubrir IDs)."""
     return _kommo_safe(kommo.listar_pipelines)
 
 
 @mcp.tool
-def kommo_listar_usuarios() -> dict[str, Any]:
+def kommo_listar_usuarios(**_n8n_envelope) -> dict[str, Any]:
     """Lista usuarios de Kommo con sus IDs (para asignar como responsables)."""
     return _kommo_safe(kommo.listar_usuarios)
 
@@ -329,7 +332,7 @@ class KommoBuscarLeadInput(LooseModel):
 
 
 @mcp.tool
-def kommo_buscar_lead(datos: KommoBuscarLeadInput) -> dict[str, Any]:
+def kommo_buscar_lead(datos: KommoBuscarLeadInput, **_n8n_envelope) -> dict[str, Any]:
     """Busca leads en Kommo por texto libre. Útil para chequear si un lead ya existe antes de crearlo."""
     return _kommo_safe(kommo.buscar_leads, datos.query, datos.limit)
 
@@ -339,7 +342,7 @@ class KommoLeadIdInput(LooseModel):
 
 
 @mcp.tool
-def kommo_obtener_lead(datos: KommoLeadIdInput) -> dict[str, Any]:
+def kommo_obtener_lead(datos: KommoLeadIdInput, **_n8n_envelope) -> dict[str, Any]:
     """Devuelve un lead de Kommo por ID, con sus contactos asociados."""
     return _kommo_safe(kommo.obtener_lead, datos.lead_id)
 
@@ -358,7 +361,7 @@ class KommoCrearLeadInput(LooseModel):
 
 
 @mcp.tool
-def kommo_crear_lead(datos: KommoCrearLeadInput) -> dict[str, Any]:
+def kommo_crear_lead(datos: KommoCrearLeadInput, **_n8n_envelope) -> dict[str, Any]:
     """Crea un lead en Kommo (con contacto y opcionalmente compañía) en una sola operación."""
     payload = datos.model_dump()
     payload["pipeline_id"] = payload.get("pipeline_id") or config.KOMMO_PIPELINE_ID
@@ -378,7 +381,7 @@ class KommoActualizarLeadInput(LooseModel):
 
 
 @mcp.tool
-def kommo_actualizar_lead(datos: KommoActualizarLeadInput) -> dict[str, Any]:
+def kommo_actualizar_lead(datos: KommoActualizarLeadInput, **_n8n_envelope) -> dict[str, Any]:
     """Actualiza campos puntuales de un lead en Kommo (nombre, pipeline, status, responsable, precio)."""
     return _kommo_safe(
         kommo.actualizar_lead,
@@ -401,7 +404,7 @@ class KommoMoverLeadInput(LooseModel):
 
 
 @mcp.tool
-def kommo_mover_lead(datos: KommoMoverLeadInput) -> dict[str, Any]:
+def kommo_mover_lead(datos: KommoMoverLeadInput, **_n8n_envelope) -> dict[str, Any]:
     """Mueve un lead a otro estado en Kommo. Aceptá `status_id` directo o `clasificacion` (mapea desde .env)."""
     status_id = datos.status_id
     if status_id is None and datos.clasificacion:
@@ -424,7 +427,7 @@ class KommoAsignarResponsableInput(LooseModel):
 
 
 @mcp.tool
-def kommo_asignar_responsable(datos: KommoAsignarResponsableInput) -> dict[str, Any]:
+def kommo_asignar_responsable(datos: KommoAsignarResponsableInput, **_n8n_envelope) -> dict[str, Any]:
     """Asigna o cambia el usuario responsable de un lead en Kommo."""
     return _kommo_safe(
         kommo.actualizar_lead, datos.lead_id, responsible_user_id=datos.responsible_user_id
@@ -437,7 +440,7 @@ class KommoAgregarNotaInput(LooseModel):
 
 
 @mcp.tool
-def kommo_agregar_nota(datos: KommoAgregarNotaInput) -> dict[str, Any]:
+def kommo_agregar_nota(datos: KommoAgregarNotaInput, **_n8n_envelope) -> dict[str, Any]:
     """Agrega una nota al historial del lead en Kommo (trazabilidad de la conversación)."""
     return _kommo_safe(kommo.agregar_nota, datos.lead_id, datos.texto)
 
@@ -451,7 +454,7 @@ class KommoCrearTareaInput(LooseModel):
 
 
 @mcp.tool
-def kommo_crear_tarea(datos: KommoCrearTareaInput) -> dict[str, Any]:
+def kommo_crear_tarea(datos: KommoCrearTareaInput, **_n8n_envelope) -> dict[str, Any]:
     """Crea una tarea asociada a un lead en Kommo (recordatorio para el comercial)."""
     return _kommo_safe(
         kommo.crear_tarea,
@@ -468,13 +471,13 @@ def kommo_crear_tarea(datos: KommoCrearTareaInput) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 @mcp.tool
-def prompt_sistema() -> dict[str, str]:
+def prompt_sistema(**_n8n_envelope) -> dict[str, str]:
     """Devuelve el system prompt sugerido para configurar al agente comercial en n8n/GPT."""
     return {"system_prompt": SYSTEM_PROMPT}
 
 
 @mcp.tool
-def recargar_catalogo() -> dict[str, Any]:
+def recargar_catalogo(**_n8n_envelope) -> dict[str, Any]:
     """Recarga el catálogo de productos desde productos.yaml sin reiniciar el server."""
     data = catalogo.recargar()
     return {"productos_cargados": list(data.get("productos", {}).keys())}

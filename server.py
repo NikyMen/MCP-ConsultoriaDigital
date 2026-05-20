@@ -565,15 +565,17 @@ class StripN8nEnvelopeMiddleware:
             new_headers.append((b"content-length", str(len(new_body)).encode()))
             scope = {**scope, "headers": new_headers}
 
-        # Replay del body
-        sent = False
+        # Replay del body: la primera llamada devuelve el body (posiblemente
+        # modificado), las siguientes delegan al receive original para no
+        # romper streams (SSE / long-poll) donde la app sigue escuchando.
+        body_sent = False
 
         async def wrapped_receive():
-            nonlocal sent
-            if sent:
-                return {"type": "http.disconnect"}
-            sent = True
-            return {"type": "http.request", "body": new_body, "more_body": False}
+            nonlocal body_sent
+            if not body_sent:
+                body_sent = True
+                return {"type": "http.request", "body": new_body, "more_body": False}
+            return await receive()
 
         await self.app(scope, wrapped_receive, send)
 

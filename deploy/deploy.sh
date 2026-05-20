@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Script de deploy. Corré esto en el VPS para actualizar el código y reiniciar.
-# Asume que el repo está clonado en /opt/mcp-consultoria.
+# Asume que el repo está clonado en /opt/mcp-consultoria y que corre con PM2.
 
 set -euo pipefail
 
@@ -19,8 +19,8 @@ fi
 .venv/bin/pip install --upgrade pip
 .venv/bin/pip install -r requirements.txt
 
-echo "==> restart $SERVICE"
-sudo systemctl restart "$SERVICE"
-sudo systemctl status --no-pager "$SERVICE" || true
+echo "==> restart $SERVICE (PM2)"
+pm2 restart "$SERVICE" --update-env
 
 echo "==> OK"
+pm2 status "$SERVICE"

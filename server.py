@@ -34,7 +34,15 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 from starlette.routing import Mount
 
-from src import catalogo, config, cuit as cuit_mod, kommo, leads, pdf as pdf_mod
+from src import (
+    calendar_google,
+    catalogo,
+    config,
+    cuit as cuit_mod,
+    kommo,
+    leads,
+    pdf as pdf_mod,
+)
 from src.db import init_db
 from src.prompts import SYSTEM_PROMPT
 
@@ -288,6 +296,75 @@ def generar_presupuesto(datos: GenerarPresupuestoInput) -> dict[str, Any]:
         "total_ars": total,
         "lead": lead,
     }
+
+
+# ---------------------------------------------------------------------------
+# Tools: agendar reunión (Google Calendar)
+# ---------------------------------------------------------------------------
+
+class AgendarReunionInput(LooseModel):
+    lead_id: int = Field(..., description="ID del lead local con quien se agenda la reunión.")
+    fecha_hora_iso: str = Field(
+        ...,
+        description=(
+            "ISO 8601 en hora local Argentina, ej '2026-05-25T15:00:00'. "
+            "Sin offset — se asume el GOOGLE_CALENDAR_TIMEZONE del .env."
+        ),
+    )
+    duracion_min: int | None = Field(
+        None,
+        description="Duración en minutos. Default 30 (GOOGLE_CALENDAR_DURACION_DEFAULT_MIN).",
+    )
+    titulo: str | None = Field(
+        None,
+        description="Título del evento. Default: 'Reunión Consultoría Digital — <empresa o nombre>'.",
+    )
+    notas: str | None = Field(None, description="Descripción / agenda interna del evento.")
+    invitar_email: str | None = Field(
+        None,
+        description="Email del lead a invitar. Si se pasa, Google manda invite y agrega al Meet.",
+    )
+
+
+@mcp.tool
+def agendar_reunion(datos: AgendarReunionInput) -> dict[str, Any]:
+    """Crea una reunión real en Google Calendar (con link de Meet) para el lead.
+
+    Devuelve `event_id`, `html_link` (vista del evento), `meet_link` (Google Meet),
+    `inicio`, `fin` y `timezone`. Si faltan credenciales o falla la API devuelve
+    `{"error": "..."}`. El lead debe existir previamente.
+    """
+    lead = leads.obtener(datos.lead_id)
+    if not lead:
+        return {"error": f"Lead {datos.lead_id} no encontrado"}
+
+    titulo = datos.titulo or (
+        f"Reunión Consultoría Digital — {lead.get('empresa') or lead.get('nombre') or 'Lead'}"
+    )
+    descripcion = datos.notas or (
+        f"Reunión con lead #{lead['id']}"
+        f" ({lead.get('telefono') or 'sin teléfono'}, "
+        f"{lead.get('empresa') or 'sin empresa'})"
+    )
+    invitados = [datos.invitar_email] if datos.invitar_email else []
+
+    try:
+        evento = calendar_google.crear_evento(
+            titulo=titulo,
+            descripcion=descripcion,
+            inicio_iso=datos.fecha_hora_iso,
+            duracion_min=datos.duracion_min or config.GOOGLE_CALENDAR_DURACION_DEFAULT_MIN,
+            invitados_emails=invitados,
+        )
+    except calendar_google.CalendarError as e:
+        return {"error": str(e), "status": e.status, "body": e.body}
+
+    leads.registrar_evento(
+        lead["id"],
+        "reunion_agendada",
+        f"{evento['inicio']} → {evento.get('meet_link') or evento.get('html_link')}",
+    )
+    return evento
 
 
 # ---------------------------------------------------------------------------

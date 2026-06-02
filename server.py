@@ -61,7 +61,7 @@ class LooseModel(BaseModel):
 # ---------------------------------------------------------------------------
 
 class ProductoKeyInput(LooseModel):
-    producto: str = Field(..., description="Clave del producto: gestion_redes, pauta_meta, crm, concilia, turneria.")
+    producto: str = Field(..., description="Clave del producto: gestion_redes, pauta_meta, crm, concilia, turneria, desarrollo_software.")
 
 
 class TextoClienteInput(LooseModel):
@@ -82,7 +82,8 @@ def productos_disponibles() -> dict[str, Any]:
 
 @mcp.tool
 def info_producto(datos: ProductoKeyInput) -> dict[str, Any]:
-    """Información detallada de un producto: nombre, descripción, qué incluye y precio desde."""
+    """Información detallada de un producto: nombre, descripción, problema que
+    resuelve, beneficios, cómo funciona, para quién es ideal, qué incluye y precio."""
     p = catalogo.producto(datos.producto)
     if not p:
         return {"error": f"Producto '{datos.producto}' no encontrado", "claves_validas": catalogo.claves_productos()}
@@ -90,6 +91,11 @@ def info_producto(datos: ProductoKeyInput) -> dict[str, Any]:
         "clave": datos.producto,
         "nombre": p.get("nombre"),
         "descripcion": p.get("descripcion"),
+        "problema": p.get("problema"),
+        "beneficios": p.get("beneficios", []),
+        "como_funciona": p.get("como_funciona", []),
+        "integraciones": p.get("integraciones", []),
+        "ideal_para": p.get("ideal_para"),
         "incluye": p.get("incluye", []),
         "precio_desde": p.get("precio_desde"),
         "precio_moneda": p.get("precio_moneda"),
@@ -148,7 +154,7 @@ class RegistrarLeadInput(LooseModel):
     cuit: str | None = Field(None, description="CUIT que dio el cliente (empresa o personal).")
     cuit_valido: bool | None = Field(None, description="True si el CUIT ya fue validado con validar_cuit.")
     producto_interes: str | None = Field(
-        None, description="Clave del producto: gestion_redes, pauta_meta, crm, concilia, turneria."
+        None, description="Clave del producto: gestion_redes, pauta_meta, crm, concilia, turneria, desarrollo_software."
     )
     clasificacion: str | None = Field(
         None,

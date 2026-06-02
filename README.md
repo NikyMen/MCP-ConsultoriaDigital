@@ -28,6 +28,7 @@ código). Incluye descripción, FAQs y precios:
 - `crm` — Automatización con CRM
 - `concilia` — Conciliación bancaria con IA
 - `turneria` — Software de turnos para salud
+- `desarrollo_software` — Desarrollo de software a medida (ERP, apps, automatizaciones)
 
 ## Herramientas MCP expuestas
 

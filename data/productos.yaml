@@ -27,6 +27,18 @@ productos:
       - Diseño de piezas gráficas
       - Contacto diario y permanente por grupo de WhatsApp
       - Planificación, producción y edición de todo el contenido publicado
+    problema: >-
+      Muchas empresas publican sin estrategia, sin constancia y sin tiempo para
+      producir contenido de calidad. Eso frena el crecimiento de la marca y
+      desperdicia el potencial de las redes como canal de ventas.
+    beneficios:
+      - "El cliente se desentiende de la tarea: nos ocupamos de todo de punta a punta"
+      - Contenido planificado, profesional y con constancia mensual
+      - Comunicación diaria por grupo de WhatsApp
+      - Marca ordenada y presente en Facebook e Instagram
+    ideal_para: >-
+      Empresas y emprendedores con CUIT que quieren tener presencia profesional
+      en redes sociales sin destinar tiempo interno a producir contenido.
     precio_desde: 650000   # $650.000/mes IVA incluido (ref. presupuesto)
     precio_moneda: "ARS"
     precio_unidad: "mensual (IVA incluido)"
@@ -69,6 +81,19 @@ productos:
       - Crédito publicitario en Meta pagado por transferencia con Factura A
       - Carga mínima equivalente a 200 USD en cuenta + 30% de fee de agencia
       - Reportes de resultados
+    problema: >-
+      Pagar pauta con tarjeta personal no permite deducir IVA ni Ganancias, no
+      da factura y limita la inversión. Además, sin gestión profesional las
+      campañas no se optimizan y el dinero se gasta sin generar resultados reales.
+    beneficios:
+      - Pagás la pauta por transferencia y recibís Factura A (deducís IVA y Ganancias)
+      - "Línea de crédito propia en Meta: no dependés de la tarjeta personal"
+      - Campañas optimizadas para resultados reales (visitas, consultas, leads)
+      - Gestión BONIFICADA si contratás Gestión de Redes
+      - Seguimiento y reportes de resultados mes a mes
+    ideal_para: >-
+      Empresas que ya invierten en pauta o quieren empezar, y que necesitan
+      facturar la inversión publicitaria y profesionalizar sus campañas en Meta.
     precio_desde: 0   # Gestión bonificada con RRSS; crédito = 200 USD + 30% fee
     precio_moneda: "ARS"
     precio_unidad: "Gestión BONIFICADA al contratar RRSS · Crédito: mín. 200 USD + 30% fee de agencia"
@@ -108,6 +133,23 @@ productos:
       - Capacitación al equipo de trabajo
       - Reuniones de ajuste, corrección y seguimiento
       - Soporte y asistencia mensual (ajustes y actualizaciones)
+    problema: >-
+      Las consultas llegan dispersas por Instagram, TikTok, web, WhatsApp y
+      Facebook, y muchas se pierden sin respuesta. Sin un sistema central, el
+      equipo no hace seguimiento y se escapan oportunidades de venta.
+    como_funciona:
+      - Centralizá todos tus canales digitales en un solo panel
+      - Recibí y respondé mensajes desde un único lugar
+      - Hacé seguimiento con tu equipo en tiempo real
+      - Automatizá tareas repetitivas con salesbot y enfocá la energía en vender
+    beneficios:
+      - Ningún lead se queda sin respuesta gracias a las automatizaciones
+      - Mejores cierres porque no se escapan oportunidades
+      - Equipo trabajando ordenado, con proceso comercial claro
+      - Somos socios oficiales de Kommo (Kommo Partner)
+    ideal_para: >-
+      Empresas con flujo de consultas por varios canales que quieren ordenar su
+      proceso comercial y automatizar el seguimiento de leads.
     precio_desde: 1850000   # Setup único $1.850.000 + soporte $363.000/mes (IVA incl.)
     precio_moneda: "ARS"
     precio_unidad: "setup único $1.850.000 (pago único) + soporte $363.000/mes — IVA incluido"
@@ -148,6 +190,31 @@ productos:
       - Capacitación a tu equipo para operar la herramienta
       - Servicios de estructura (VPS, n8n, webhook de integración con Kommo)
       - Asistencia mensual y cambios en el funcionamiento del asistente
+    problema: >-
+      Un administrativo dedica entre 2 y 4 horas diarias a revisar movimientos
+      bancarios, descargar comprobantes, verificar transferencias y conciliar a
+      mano cada operación: unas 88 horas por mes y más de 1.000 horas al año en
+      tareas repetitivas, con errores humanos, demoras y cuellos de botella.
+    como_funciona:
+      - Envía comprobante (por WhatsApp y otros canales)
+      - Digitalización automática del comprobante
+      - Búsqueda y cotejo contra el banco y el ERP
+      - Relaciona pagos automáticamente
+      - Listo para conciliar en minutos
+    beneficios:
+      - Reduce la carga operativa del equipo y libera tiempo para tareas estratégicas
+      - Reduce márgenes de error con validaciones inteligentes
+      - "Mayor velocidad operativa: lo que antes tomaba horas se hace en minutos"
+      - Mejor control financiero con información centralizada y trazable
+      - Reduce costos ocultos (horas improductivas y retrabajos)
+      - Escalable, ideal para empresas con gran volumen de transferencias
+    integraciones:
+      - Conexión directa con extractos y movimientos bancarios en tiempo real
+      - Se vincula a tu ERP, software contable, CRM y plataformas internas
+      - Sin pérdida de información histórica y sin modificar procesos internos
+    ideal_para: >-
+      Empresas con alto volumen de pagos y transferencias que pierden horas
+      conciliando manualmente y quieren automatizar el proceso de punta a punta.
     precio_desde: 1810000   # Setup único $1.810.000 + asistencia $360.000/mes (IVA incl.)
     precio_moneda: "ARS"
     precio_unidad: "setup único $1.810.000 (pago único) + asistencia $360.000/mes — IVA incluido"
@@ -188,6 +255,23 @@ productos:
       - Recordatorios automáticos a cada paciente
       - Integración con tu sistema de gestión y lista de pacientes
       - Asistencia mensual y cambios en el funcionamiento del asistente
+    problema: >-
+      La secretaría pierde gran parte del día atendiendo llamadas y mensajes para
+      dar, mover o cancelar turnos, y fuera del horario de atención los pacientes
+      quedan sin respuesta. El ausentismo y la tarea manual generan pérdidas.
+    como_funciona:
+      - WhatsApp 24/7, atención automática sin interrupciones
+      - "Gestión completa: toma, reprogramación y cancelación de turnos"
+      - Recordatorios automáticos para cada paciente
+      - Integración total con tus herramientas y sistema de gestión actual
+    beneficios:
+      - Reduce la tarea manual de la secretaría
+      - Atención 24/7 sin perder pacientes fuera de horario
+      - Menos ausentismo gracias a recordatorios y cobro por adelantado
+      - Seguís usando tu sistema actual, ahora con atención automatizada
+    ideal_para: >-
+      Desde consultorios y profesionales individuales hasta policonsultorios,
+      clínicas y sanatorios con varios profesionales y consultorios.
     precio_desde: 1850000   # Setup único $1.850.000 + asistencia $363.000/mes (IVA incl.)
     precio_moneda: "ARS"
     precio_unidad: "setup único $1.850.000 (pago único) + asistencia $363.000/mes — IVA incluido"
@@ -202,6 +286,79 @@ productos:
         respuesta: "Sí. Turnería permite cobrar la consulta al momento de reservar el turno, reduciendo ausentismo."
       - pregunta: "¿Envía recordatorios por WhatsApp?"
         respuesta: "Sí, envía recordatorios automáticos a los pacientes para confirmar o cancelar el turno."
+
+  desarrollo_software:
+    nombre: "Desarrollo de Software a Medida"
+    keywords:
+      - software
+      - desarrollo
+      - desarrollar
+      - medida
+      - sistema
+      - sistemas
+      - erp
+      - app
+      - aplicacion
+      - aplicación
+      - web
+      - pagina
+      - página
+      - plataforma
+      - automatizacion
+      - automatización
+      - automatizaciones
+      - integracion
+      - integración
+      - integraciones
+      - api
+      - programacion
+      - programación
+      - bot
+      - agente
+      - ia
+    descripcion: >-
+      Desarrollamos software a medida de punta a punta: hacemos de todo, desde un
+      ERP o sistema de gestión completo hasta automatizaciones complejas e
+      integraciones entre sistemas. Relevamos tu proceso, diseñamos la solución y
+      la dejamos funcionando, adaptada 100% a cómo trabaja tu empresa.
+    incluye:
+      - Relevamiento y análisis del proceso a digitalizar o automatizar
+      - Desarrollo de ERP y sistemas de gestión a medida
+      - Aplicaciones web y plataformas internas
+      - Automatizaciones complejas (n8n, agentes de IA, bots)
+      - Integraciones con APIs, bancos, CRMs y sistemas externos
+      - Puesta en marcha, capacitación y soporte
+    problema: >-
+      Las herramientas genéricas rara vez encajan con cómo trabaja realmente una
+      empresa: quedan procesos manuales, planillas sueltas y sistemas que no se
+      hablan entre sí. Eso genera errores, retrabajo y techo para crecer.
+    como_funciona:
+      - Relevamos tu proceso y definimos el alcance
+      - Diseñamos la solución a medida (sistema, app o automatización)
+      - Desarrollamos e integramos con tus sistemas actuales
+      - Lo dejamos funcionando, capacitamos al equipo y damos soporte
+    beneficios:
+      - Solución 100% adaptada a tu operación, no al revés
+      - Desde un ERP completo hasta automatizaciones puntuales
+      - Integra y conecta los sistemas que hoy no se hablan entre sí
+      - Reduce tareas manuales, errores y costos ocultos
+      - "Escalable: el sistema crece con tu empresa"
+    ideal_para: >-
+      Empresas que necesitan un sistema o automatización a medida que las
+      herramientas estándar no resuelven, o que quieren integrar y automatizar
+      procesos propios.
+    precio_desde: null   # A cotizar según alcance y complejidad del proyecto
+    precio_moneda: "ARS"
+    precio_unidad: "a cotizar según alcance del proyecto (relevamiento sin cargo)"
+    faqs:
+      - pregunta: "¿Qué tipo de software desarrollan?"
+        respuesta: "Hacemos de todo a medida: desde un ERP o sistema de gestión completo hasta aplicaciones web, integraciones entre sistemas y automatizaciones complejas con n8n y agentes de IA. Lo adaptamos 100% a tu proceso."
+      - pregunta: "¿Cuánto cuesta un desarrollo a medida?"
+        respuesta: "Depende del alcance y la complejidad del proyecto, así que lo cotizamos a medida. Hacemos un relevamiento inicial sin cargo para entender qué necesitás y pasarte una propuesta concreta."
+      - pregunta: "¿Se integra con los sistemas que ya uso?"
+        respuesta: "Sí. Nos especializamos en integrar y conectar sistemas que hoy no se hablan entre sí (ERPs, CRMs, bancos, APIs) y automatizar los procesos que los unen."
+      - pregunta: "¿Pueden automatizar un proceso puntual o solo proyectos grandes?"
+        respuesta: "Las dos cosas. Resolvemos desde una automatización puntual que te ahorra tareas manuales hasta el desarrollo de un sistema completo de gestión."
 
 # Criterios para identificar si una persona puede ser cliente
 criterios_cliente:

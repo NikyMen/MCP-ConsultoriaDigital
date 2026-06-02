@@ -44,6 +44,16 @@ CREATE TABLE IF NOT EXISTS presupuestos (
     total_ars REAL,
     creado_en TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS mensajes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    lead_id INTEGER NOT NULL REFERENCES leads(id) ON DELETE CASCADE,
+    rol TEXT NOT NULL,
+    texto TEXT NOT NULL,
+    creado_en TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_mensajes_lead ON mensajes(lead_id);
 """
 
 

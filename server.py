@@ -159,6 +159,10 @@ class RegistrarLeadInput(LooseModel):
         description="INICIAL | PRODUCTO_IDENTIFICADO | MEDIA | ALTA | DESCARTADO.",
     )
     notas: str | None = None
+    mensaje: str | None = Field(
+        None,
+        description="Opcional: último mensaje del cliente a guardar en el historial de chat junto con el registro.",
+    )
 
 
 @mcp.tool
@@ -168,8 +172,12 @@ def registrar_lead(datos: RegistrarLeadInput) -> dict[str, Any]:
         return {"error": f"clasificacion inválida: {datos.clasificacion}", "validas": sorted(leads.VALIDAS)}
     if datos.producto_interes and datos.producto_interes not in catalogo.claves_productos():
         return {"error": f"producto_interes inválido: {datos.producto_interes}", "validos": catalogo.claves_productos()}
-    lead = leads.upsert(**datos.model_dump())
+    campos = datos.model_dump()
+    mensaje = campos.pop("mensaje", None)
+    lead = leads.upsert(**campos)
     leads.registrar_evento(lead["id"], "registrar_lead", f"clasificacion={lead['clasificacion']}")
+    if mensaje:
+        leads.guardar_mensaje(lead["id"], "cliente", mensaje)
     return {"lead": lead}
 
 
@@ -215,6 +223,41 @@ class ListarLeadsInput(LooseModel):
 def listar_leads(datos: ListarLeadsInput) -> dict[str, Any]:
     """Lista los últimos leads, opcionalmente filtrando por clasificación. Uso interno."""
     return {"leads": leads.listar(clasificacion=datos.clasificacion, limit=datos.limit)}
+
+
+class GuardarMensajeInput(LooseModel):
+    telefono: str = Field(..., description="Teléfono / wa_id del lead (se crea el lead si no existe).")
+    texto: str = Field(..., description="Contenido del mensaje a guardar en el historial de chat.")
+    rol: str = Field(
+        "cliente",
+        description="Quién escribió: 'cliente' (el lead), 'asistente' (el bot) o 'sistema'.",
+    )
+
+
+@mcp.tool
+def guardar_mensaje(datos: GuardarMensajeInput) -> dict[str, Any]:
+    """Guarda un mensaje del chat en el historial del lead. Llamala en cada turno (cliente y asistente).
+
+    Si el teléfono no existe todavía, crea el lead automáticamente (clasificación INICIAL).
+    """
+    rol = datos.rol.lower().strip()
+    if rol not in leads.ROLES_MENSAJE:
+        return {"error": f"rol inválido: {datos.rol}", "validos": sorted(leads.ROLES_MENSAJE)}
+    lead = leads.buscar_por_telefono(datos.telefono) or leads.upsert(telefono=datos.telefono)
+    mensaje_id = leads.guardar_mensaje(lead["id"], rol, datos.texto)
+    return {"mensaje_id": mensaje_id, "lead_id": lead["id"]}
+
+
+@mcp.tool
+def estado_por_telefono(datos: TelefonoInput) -> dict[str, Any]:
+    """Estado COMPLETO de un lead por teléfono en un solo llamado: datos del lead +
+    historial de chat (mensajes) + eventos + presupuestos. Usala al inicio del turno
+    para recuperar todo el contexto y ver en qué producto está interesado.
+    """
+    estado = leads.estado_completo(datos.telefono)
+    if not estado:
+        return {"lead": None, "encontrado": False}
+    return {"encontrado": True, **estado}
 
 
 # ---------------------------------------------------------------------------

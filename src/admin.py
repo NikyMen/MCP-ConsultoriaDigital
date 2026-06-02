@@ -19,7 +19,7 @@ from starlette.requests import Request
 from starlette.responses import HTMLResponse, RedirectResponse, Response
 from starlette.routing import Route
 
-from . import catalogo, config, leads
+from . import catalogo, config, herramientas, leads
 
 # ---------------------------------------------------------------------------
 # Sesión / auth
@@ -87,6 +87,7 @@ def _set_session_cookie(resp: Response, request: Request) -> None:
 NAV: list[tuple[str, str]] = [
     ("/admin", "Dashboard"),
     ("/admin/leads", "Leads"),
+    ("/admin/herramientas", "Herramientas"),
 ]
 
 ETAPA_COLOR = {
@@ -154,6 +155,29 @@ padding:34px;width:340px}
 .login h1{margin-bottom:6px}
 .err{background:#7f1d1d;color:#fecaca;padding:10px 12px;border-radius:8px;margin:14px 0;font-size:13px}
 .warn{background:#78350f;color:#fde68a;padding:10px 12px;border-radius:8px;margin:14px 0;font-size:13px}
+.grp{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:18px}
+.grp-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.grp-head h2{font-size:16px;margin:0}
+.grp-desc{color:var(--muted);font-size:13px;margin:4px 0 14px}
+.pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600}
+.pill.ok{background:#14532d;color:#86efac}
+.pill.falta{background:#7f1d1d;color:#fecaca}
+.pill.opcional{background:#1e3a5f;color:#93c5fd}
+.pill.siempre{background:#334155;color:#cbd5e1}
+.reqs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.req{font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid var(--line);color:var(--muted)}
+.req .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.req .dot.on{background:#22c55e}.req .dot.off{background:#ef4444}.req .dot.opt{background:#64748b}
+.tool{border-top:1px solid var(--line);padding:12px 0}
+.tool:first-of-type{border-top:none}
+.tool .name{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:600;color:#c7d2fe}
+.tool .dsc{color:var(--muted);font-size:13px;margin:3px 0 0}
+.params{margin:8px 0 0;display:flex;flex-direction:column;gap:4px}
+.param{font-size:12px;color:var(--muted)}
+.param code{font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--txt)}
+.param .ty{color:#7dd3fc}
+.param .rq{color:#fca5a5;font-size:10px;text-transform:uppercase;letter-spacing:.04em;margin-left:4px}
+.param .op{color:#64748b;font-size:10px;text-transform:uppercase;letter-spacing:.04em;margin-left:4px}
 """
 
 
@@ -476,6 +500,94 @@ async def eliminar_lead(request: Request) -> Response:
 
 
 # ---------------------------------------------------------------------------
+# Handlers: herramientas (tools MCP)
+# ---------------------------------------------------------------------------
+
+_PILL_LABEL = {
+    "ok": "Configurada",
+    "falta": "Falta configurar",
+    "opcional": "Lista (ajustes opcionales)",
+    "siempre": "Siempre disponible",
+}
+
+
+def _render_requisitos(reqs: list[tuple[str, bool, bool]]) -> str:
+    if not reqs:
+        return ""
+    items = ""
+    for etiqueta, presente, opcional in reqs:
+        if opcional:
+            dot = "opt" if not presente else "on"
+        else:
+            dot = "on" if presente else "off"
+        suf = " (opcional)" if opcional else ""
+        items += f'<span class="req"><span class="dot {dot}"></span>{_esc(etiqueta)}{suf}</span>'
+    return f'<div class="reqs">{items}</div>'
+
+
+def _render_params(params: list[dict[str, Any]]) -> str:
+    if not params:
+        return '<div class="param muted">Sin parámetros.</div>'
+    filas = ""
+    for p in params:
+        flag = '<span class="rq">requerido</span>' if p["requerido"] else '<span class="op">opcional</span>'
+        desc = f' — {_esc(p["descripcion"])}' if p["descripcion"] else ""
+        filas += (
+            f'<div class="param"><code>{_esc(p["nombre"])}</code> '
+            f'<span class="ty">{_esc(p["tipo"])}</span>{flag}{desc}</div>'
+        )
+    return f'<div class="params">{filas}</div>'
+
+
+async def herramientas_page(request: Request) -> Response:
+    if not _autenticado(request):
+        return _redir_login()
+
+    # Lista viva de tools desde el server MCP (introspección en runtime).
+    import server  # import diferido: evita el ciclo admin <-> server
+
+    tools = await server.mcp.list_tools()
+    por_grupo: dict[str, list[Any]] = {}
+    for t in tools:
+        por_grupo.setdefault(herramientas.grupo_de(t.name), []).append(t)
+
+    total = len(tools)
+    secciones = ""
+    for grupo in herramientas.GRUPOS:
+        items = sorted(por_grupo.get(grupo["clave"], []), key=lambda t: t.name)
+        if not items:
+            continue
+        est = herramientas.estado_grupo(grupo["requisitos"])
+        estado = est["estado"]
+        pill = f'<span class="pill {estado}">{_PILL_LABEL[estado]}</span>'
+
+        tools_html = ""
+        for t in items:
+            params = herramientas.extraer_parametros(t.parameters or {})
+            tools_html += (
+                f'<div class="tool"><div class="name">{_esc(t.name)}</div>'
+                f'<p class="dsc">{_esc(t.description or "")}</p>'
+                f'{_render_params(params)}</div>'
+            )
+
+        secciones += f"""
+<section class="grp">
+  <div class="grp-head"><h2>{_esc(grupo["nombre"])}</h2>{pill}
+    <span class="muted" style="font-size:12px">{len(items)} tool(s)</span></div>
+  <p class="grp-desc">{_esc(grupo["descripcion"])}</p>
+  {_render_requisitos(est["requisitos"])}
+  {tools_html}
+</section>"""
+
+    cuerpo = f"""
+<h1>Herramientas</h1>
+<p class="sub">{total} herramientas MCP expuestas al agente. La configuración se ajusta en el <code>.env</code>.</p>
+{secciones}
+"""
+    return HTMLResponse(_layout("Herramientas", cuerpo, "/admin/herramientas"))
+
+
+# ---------------------------------------------------------------------------
 # Registro de rutas
 # ---------------------------------------------------------------------------
 
@@ -484,6 +596,7 @@ def routes() -> list[Route]:
         Route("/admin/login", login, methods=["GET", "POST"]),
         Route("/admin/logout", logout, methods=["GET"]),
         Route("/admin", dashboard, methods=["GET"]),
+        Route("/admin/herramientas", herramientas_page, methods=["GET"]),
         Route("/admin/leads", lista_leads, methods=["GET"]),
         Route("/admin/leads/nuevo", nuevo_lead, methods=["GET", "POST"]),
         Route("/admin/leads/{lead_id:int}", detalle_lead, methods=["GET"]),

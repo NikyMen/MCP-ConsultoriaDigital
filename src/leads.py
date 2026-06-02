@@ -100,6 +100,29 @@ def upsert(
     return obtener(lead_id)  # type: ignore[return-value]
 
 
+ROLES_MENSAJE = {"cliente", "asistente", "sistema"}
+
+
+def guardar_mensaje(lead_id: int, rol: str, texto: str) -> int:
+    """Guarda un mensaje del chat asociado al lead. rol: cliente | asistente | sistema."""
+    with get_conn() as conn:
+        cur = conn.execute(
+            "INSERT INTO mensajes (lead_id, rol, texto, creado_en) VALUES (?, ?, ?, ?)",
+            (lead_id, rol, texto, now_iso()),
+        )
+        return int(cur.lastrowid)
+
+
+def mensajes(lead_id: int, limit: int = 200) -> list[dict[str, Any]]:
+    """Historial de chat del lead, en orden cronológico (más viejo primero)."""
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT * FROM mensajes WHERE lead_id = ? ORDER BY id ASC LIMIT ?",
+            (lead_id, limit),
+        ).fetchall()
+    return [_row_to_dict(r) for r in rows]
+
+
 def registrar_evento(lead_id: int, tipo: str, detalle: str | None = None) -> None:
     with get_conn() as conn:
         conn.execute(
@@ -186,6 +209,23 @@ def presupuestos(lead_id: int) -> list[dict[str, Any]]:
             (lead_id,),
         ).fetchall()
     return [_row_to_dict(r) for r in rows]
+
+
+def estado_completo(telefono: str) -> dict[str, Any] | None:
+    """Estado integral de un lead por teléfono: datos + chat + eventos + presupuestos.
+
+    Devuelve None si no existe ningún lead con ese teléfono.
+    """
+    lead = buscar_por_telefono(telefono)
+    if not lead:
+        return None
+    lead_id = lead["id"]
+    return {
+        "lead": lead,
+        "mensajes": mensajes(lead_id),
+        "eventos": eventos(lead_id),
+        "presupuestos": presupuestos(lead_id),
+    }
 
 
 def actualizar(lead_id: int, **campos: Any) -> dict[str, Any] | None:

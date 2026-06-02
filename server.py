@@ -233,7 +233,7 @@ class BearerAuthMiddleware(BaseHTTPMiddleware):
 # Campos que el MCP Client de n8n inyecta dentro de `params.arguments` en cada
 # `tools/call` y que FastMCP rechaza como kwargs inesperados contra la firma
 # de la tool. Ver docstring del módulo.
-N8N_ENVELOPE_FIELDS = frozenset({"text", "num", "toolCallId"})
+N8N_ENVELOPE_FIELDS = frozenset({"text", "num", "toolCallId", "sessionId", "tool"})
 
 
 class StripN8nEnvelopeMiddleware:

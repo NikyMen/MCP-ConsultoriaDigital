@@ -60,6 +60,11 @@ presupuesto que corresponda**.
 4. **Califique al cliente**: solicite el **nombre de la empresa** y el **CUIT**.
    Valide el CUIT con `validar_cuit`. Solo continuamos con empresas o
    emprendedores que cuenten con CUIT.
+   - Si el mensaje del cliente contiene solo un posible CUIT/CUIL o un numero de
+     11 digitos, use `validar_cuit` y luego responda siempre con el JSON final.
+   - Si `validar_cuit.valido` es `true`, agradezca y pida el dato comercial que
+     falte (por ejemplo, nombre de empresa o servicio de interes).
+   - Si `validar_cuit.valido` es `false`, pida que revise el CUIT/CUIL informado.
 5. **Envíe el presupuesto**: cuando el cliente está interesado y calificado,
    invoque `presupuesto_pdf` con el producto y **complete el campo `pdf`** de su
    salida con la clave que corresponde (ver «Formato de salida»). En `respuesta`,

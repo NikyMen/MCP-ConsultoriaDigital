@@ -32,14 +32,15 @@ from pydantic import BaseModel, ConfigDict, Field
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import JSONResponse
-from starlette.routing import Mount
+from starlette.responses import FileResponse, JSONResponse
+from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
 
 from src import (
     catalogo,
     config,
     cuit as cuit_mod,
+    store,
 )
 
 # ---------------------------------------------------------------------------
@@ -188,7 +189,7 @@ def presupuestos_disponibles() -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 class CuitInput(LooseModel):
-    cuit: str = Field(..., description="CUIT en cualquier formato (con o sin guiones).")
+    cuit: str = Field(..., description="CUIT/CUIL argentino en cualquier formato (con o sin guiones).")
 
 
 @mcp.tool
@@ -200,6 +201,44 @@ def validar_cuit(datos: CuitInput) -> dict[str, Any]:
         "valido": cuit_mod.es_valido(datos.cuit),
         "formateado": cuit_mod.formatear(datos.cuit),
     }
+
+
+# ---------------------------------------------------------------------------
+# Tools: registro de mensajes (alimenta el panel /panel)
+# ---------------------------------------------------------------------------
+
+class RegistrarMensajeInput(LooseModel):
+    telefono: str = Field(..., description="Teléfono del lead (identificador de la conversación).")
+    texto: str = Field(..., description="Contenido del mensaje.")
+    rol: str = Field("cliente", description="Quién lo envió: 'cliente' o 'bot'.")
+    nombre: str | None = Field(None, description="Nombre del lead, si se conoce.")
+    producto_interes: str | None = Field(None, description="Clave del producto de interés detectado.")
+    clasificacion: str | None = Field(
+        None,
+        description="Estado del lead: NUEVO, EN_CONVERSACION, CALIFICADO, PRESUPUESTO_ENVIADO, CERRADO, DESCARTADO.",
+    )
+    cuit: str | None = Field(None, description="CUIT del lead, si se obtuvo.")
+    cuit_valido: bool | None = Field(None, description="Si el CUIT fue validado como correcto.")
+
+
+@mcp.tool
+def registrar_mensaje(datos: RegistrarMensajeInput) -> dict[str, Any]:
+    """Guarda un mensaje recibido (o enviado) y crea/actualiza el lead asociado
+    por teléfono, con su clasificación y producto de interés. Alimenta el panel
+    web de mensajes clasificados (/panel). Llamala desde n8n por cada mensaje."""
+    try:
+        return {"ok": True, **store.registrar_mensaje(
+            telefono=datos.telefono,
+            texto=datos.texto,
+            rol=datos.rol,
+            nombre=datos.nombre,
+            producto_interes=datos.producto_interes,
+            clasificacion=datos.clasificacion,
+            cuit=datos.cuit,
+            cuit_valido=datos.cuit_valido,
+        )}
+    except ValueError as e:
+        return {"ok": False, "error": str(e)}
 
 
 # ---------------------------------------------------------------------------
@@ -310,11 +349,52 @@ class StripN8nEnvelopeMiddleware:
         await self.app(scope, wrapped_receive, send)
 
 
+# ---------------------------------------------------------------------------
+# Panel web: /panel (HTML) + /api/mensajes (JSON), protegidos por PANEL_TOKEN
+# ---------------------------------------------------------------------------
+
+def _panel_autorizado(request) -> bool:
+    """True si no hay token configurado o si el request trae el token correcto."""
+    if not config.PANEL_TOKEN:
+        return True
+    token = request.query_params.get("token")
+    if not token:
+        auth = request.headers.get("authorization", "")
+        if auth.startswith("Bearer "):
+            token = auth[len("Bearer "):]
+    return token == config.PANEL_TOKEN
+
+
+async def panel_html(request):
+    if not _panel_autorizado(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    return FileResponse(config.ROOT_WEB_DIR / "panel.html")
+
+
+async def api_mensajes(request):
+    if not _panel_autorizado(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    clasif = request.query_params.get("clasificacion") or None
+    producto = request.query_params.get("producto") or None
+    try:
+        limit = int(request.query_params.get("limit", "500"))
+    except ValueError:
+        limit = 500
+    return JSONResponse({
+        "mensajes": store.listar_mensajes(clasificacion=clasif, producto=producto, limit=limit),
+        "resumen": store.resumen(),
+    })
+
+
 def build_app() -> Starlette:
+    store.init_db()
     mcp_app = mcp.http_app(path="/mcp")
     wrapped_mcp = StripN8nEnvelopeMiddleware(mcp_app)
 
-    routes = []
+    routes = [
+        Route("/panel", panel_html),
+        Route("/api/mensajes", api_mensajes),
+    ]
     # PDFs de presupuesto servidos como archivos estáticos en /presupuestos.
     # Público (el BearerAuthMiddleware solo protege /mcp) para que WaSender /
     # WhatsApp puedan descargarlos por URL. Se monta solo si la carpeta existe.

@@ -22,6 +22,12 @@ MCP_AUTH_TOKEN = os.getenv("MCP_AUTH_TOKEN", "")
 # Ej: https://tu-dominio.com/presupuestos
 PRESUPUESTOS_BASE_URL = os.getenv("PRESUPUESTOS_BASE_URL", "").rstrip("/")
 
+ROOT_WEB_DIR = ROOT_DIR / "web"
+
+# Token para acceder al panel web (/panel y /api/*). Si está vacío, el panel
+# queda público. Se pasa como ?token=... o header Authorization: Bearer ...
+PANEL_TOKEN = os.getenv("PANEL_TOKEN", "")
+
 EMPRESA_NOMBRE = os.getenv("EMPRESA_NOMBRE", "Consultoría Digital")
 EMPRESA_CUIT = os.getenv("EMPRESA_CUIT", "")
 EMPRESA_EMAIL = os.getenv("EMPRESA_EMAIL", "")

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Panel · Mensajes recibidos</title>
+  <style>
+    :root {
+      --bg: #0f172a; --panel: #1e293b; --panel2: #273449; --text: #e2e8f0;
+      --muted: #94a3b8; --accent: #38bdf8; --border: #334155;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+           background: var(--bg); color: var(--text); }
+    header { padding: 18px 24px; border-bottom: 1px solid var(--border);
+             display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    h1 { font-size: 18px; margin: 0; }
+    .cards { display: flex; gap: 12px; flex-wrap: wrap; padding: 18px 24px; }
+    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+            padding: 12px 16px; min-width: 120px; }
+    .card .n { font-size: 26px; font-weight: 700; }
+    .card .l { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+    .filtros { display: flex; gap: 10px; flex-wrap: wrap; padding: 0 24px 12px; align-items: center; }
+    select, button, input { background: var(--panel2); color: var(--text); border: 1px solid var(--border);
+             border-radius: 8px; padding: 8px 10px; font-size: 14px; }
+    button { cursor: pointer; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border);
+             font-size: 14px; vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; }
+    tr:hover td { background: rgba(56,189,248,.05); }
+    .pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+    .rol-cliente { color: #bae6fd; }
+    .rol-bot, .rol-asistente { color: #86efac; }
+    .texto { max-width: 480px; white-space: pre-wrap; }
+    .muted { color: var(--muted); }
+    .wrap { padding: 0 24px 40px; }
+    a.tel { color: var(--accent); text-decoration: none; }
+    .empty { padding: 40px; text-align: center; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📨 Mensajes recibidos y clasificados</h1>
+    <span id="reloj" class="muted" style="margin-left:auto;font-size:13px"></span>
+  </header>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="filtros">
+    <label>Clasificación:
+      <select id="fClasif"><option value="">Todas</option></select>
+    </label>
+    <label>Producto:
+      <select id="fProd"><option value="">Todos</option></select>
+    </label>
+    <button id="btnRecargar">↻ Recargar</button>
+    <label class="muted" style="font-size:13px">
+      <input type="checkbox" id="autoRefresh" checked style="width:auto"> auto (10s)
+    </label>
+  </div>
+
+  <div class="wrap">
+    <table>
+      <thead>
+        <tr><th>Fecha</th><th>Teléfono</th><th>Nombre</th><th>Rol</th>
+            <th>Mensaje</th><th>Producto</th><th>Clasificación</th><th>CUIT</th></tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div id="empty" class="empty" hidden>Sin mensajes todavía.</div>
+  </div>
+
+  <script>
+    const COLORES = {
+      NUEVO: "#64748b", EN_CONVERSACION: "#0ea5e9", CALIFICADO: "#a855f7",
+      PRESUPUESTO_ENVIADO: "#f59e0b", CERRADO: "#22c55e", DESCARTADO: "#ef4444",
+    };
+    const qs = new URLSearchParams(location.search);
+    const TOKEN = qs.get("token") || "";
+    function api(path) {
+      const u = new URL(path, location.origin);
+      if (TOKEN) u.searchParams.set("token", TOKEN);
+      const f = u.searchParams.get("filtro");
+      return u;
+    }
+    function fmtFecha(iso) {
+      try { return new Date(iso).toLocaleString("es-AR"); } catch { return iso; }
+    }
+    function pill(txt) {
+      const c = COLORES[txt] || "#475569";
+      return `<span class="pill" style="background:${c}22;color:${c};border:1px solid ${c}66">${txt||"-"}</span>`;
+    }
+    async function cargar() {
+      const clasif = document.getElementById("fClasif").value;
+      const prod = document.getElementById("fProd").value;
+      const u = api("/api/mensajes");
+      if (clasif) u.searchParams.set("clasificacion", clasif);
+      if (prod) u.searchParams.set("producto", prod);
+      const r = await fetch(u);
+      if (!r.ok) { document.getElementById("tbody").innerHTML =
+        `<tr><td colspan="8" class="empty">Error ${r.status}. ¿Token correcto?</td></tr>`; return; }
+      const data = await r.json();
+      pintarCards(data.resumen);
+      pintarFiltros(data.resumen);
+      pintarTabla(data.mensajes);
+      document.getElementById("reloj").textContent = "Actualizado " + new Date().toLocaleTimeString("es-AR");
+    }
+    function pintarCards(res) {
+      const cards = [
+        ["Leads", res.total_leads], ["Mensajes", res.total_mensajes],
+      ];
+      for (const [k, v] of Object.entries(res.por_clasificacion || {})) cards.push([k, v]);
+      document.getElementById("cards").innerHTML = cards.map(
+        ([l, n]) => `<div class="card"><div class="n">${n}</div><div class="l">${l}</div></div>`
+      ).join("");
+    }
+    let filtrosListos = false;
+    function pintarFiltros(res) {
+      if (filtrosListos) return;
+      const c = document.getElementById("fClasif"), p = document.getElementById("fProd");
+      for (const k of Object.keys(res.por_clasificacion || {}))
+        c.insertAdjacentHTML("beforeend", `<option value="${k}">${k}</option>`);
+      for (const k of Object.keys(res.por_producto || {}))
+        p.insertAdjacentHTML("beforeend", `<option value="${k}">${k}</option>`);
+      filtrosListos = true;
+    }
+    function pintarTabla(msgs) {
+      const tb = document.getElementById("tbody");
+      document.getElementById("empty").hidden = msgs.length > 0;
+      tb.innerHTML = msgs.map(m => `
+        <tr>
+          <td class="muted">${fmtFecha(m.creado_en)}</td>
+          <td><a class="tel" href="https://wa.me/${(m.telefono||"").replace(/\D/g,'')}" target="_blank">${m.telefono||""}</a></td>
+          <td>${m.nombre||"<span class='muted'>—</span>"}</td>
+          <td class="rol-${(m.rol||'').toLowerCase()}">${m.rol||""}</td>
+          <td class="texto">${escapeHtml(m.texto||"")}</td>
+          <td>${m.producto_interes||"<span class='muted'>—</span>"}</td>
+          <td>${pill(m.clasificacion)}</td>
+          <td class="muted">${m.cuit||""}${m.cuit_valido?" ✓":""}</td>
+        </tr>`).join("");
+    }
+    function escapeHtml(s) {
+      return s.replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+    }
+    document.getElementById("btnRecargar").onclick = cargar;
+    document.getElementById("fClasif").onchange = cargar;
+    document.getElementById("fProd").onchange = cargar;
+    let timer = setInterval(() => { if (document.getElementById("autoRefresh").checked) cargar(); }, 10000);
+    cargar();
+  </script>
+</body>
+</html>

@@ -18,6 +18,10 @@ MCP_HOST = os.getenv("MCP_HOST", "0.0.0.0")
 MCP_PORT = int(os.getenv("MCP_PORT", "8765"))
 MCP_AUTH_TOKEN = os.getenv("MCP_AUTH_TOKEN", "")
 
+# Panel de administración web (montado en /admin)
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "").strip()
+ADMIN_SESSION_SECRET = os.getenv("ADMIN_SESSION_SECRET", "").strip()
+
 EMPRESA_NOMBRE = os.getenv("EMPRESA_NOMBRE", "Consultoría Digital")
 EMPRESA_CUIT = os.getenv("EMPRESA_CUIT", "")
 EMPRESA_EMAIL = os.getenv("EMPRESA_EMAIL", "")

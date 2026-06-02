@@ -139,3 +139,68 @@ def guardar_presupuesto(
             (lead_id, producto, archivo, url_publica, total_ars, now_iso()),
         )
         return int(cur.lastrowid)
+
+
+# ---------------------------------------------------------------------------
+# Consultas para el panel de administración
+# ---------------------------------------------------------------------------
+
+_CAMPOS_EDITABLES = {
+    "telefono",
+    "nombre",
+    "empresa",
+    "cuit",
+    "producto_interes",
+    "clasificacion",
+    "notas",
+}
+
+
+def contar_por_clasificacion() -> dict[str, int]:
+    """Devuelve {clasificacion: cantidad} para el dashboard."""
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT clasificacion, COUNT(*) AS c FROM leads GROUP BY clasificacion"
+        ).fetchall()
+    return {r["clasificacion"]: r["c"] for r in rows}
+
+
+def total() -> int:
+    with get_conn() as conn:
+        return int(conn.execute("SELECT COUNT(*) AS c FROM leads").fetchone()["c"])
+
+
+def eventos(lead_id: int, limit: int = 200) -> list[dict[str, Any]]:
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT * FROM eventos WHERE lead_id = ? ORDER BY id DESC LIMIT ?",
+            (lead_id, limit),
+        ).fetchall()
+    return [_row_to_dict(r) for r in rows]
+
+
+def presupuestos(lead_id: int) -> list[dict[str, Any]]:
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT * FROM presupuestos WHERE lead_id = ? ORDER BY id DESC",
+            (lead_id,),
+        ).fetchall()
+    return [_row_to_dict(r) for r in rows]
+
+
+def actualizar(lead_id: int, **campos: Any) -> dict[str, Any] | None:
+    """Actualiza campos puntuales de un lead por ID (uso del panel)."""
+    sets = {k: v for k, v in campos.items() if k in _CAMPOS_EDITABLES}
+    if not sets:
+        return obtener(lead_id)
+    sets["actualizado_en"] = now_iso()
+    asignaciones = ", ".join(f"{k}=?" for k in sets)
+    valores = list(sets.values()) + [lead_id]
+    with get_conn() as conn:
+        conn.execute(f"UPDATE leads SET {asignaciones} WHERE id=?", valores)
+    return obtener(lead_id)
+
+
+def eliminar(lead_id: int) -> None:
+    with get_conn() as conn:
+        conn.execute("DELETE FROM leads WHERE id=?", (lead_id,))

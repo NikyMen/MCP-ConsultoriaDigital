@@ -35,6 +35,7 @@ from starlette.responses import JSONResponse
 from starlette.routing import Mount
 
 from src import (
+    admin,
     calendar_google,
     catalogo,
     config,
@@ -567,8 +568,10 @@ def recargar_catalogo() -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 class BearerAuthMiddleware(BaseHTTPMiddleware):
+    """Bearer auth SOLO para el MCP (/mcp). El panel /admin usa su propia sesión."""
+
     async def dispatch(self, request, call_next):  # type: ignore[override]
-        if not config.MCP_AUTH_TOKEN:
+        if not request.url.path.startswith("/mcp") or not config.MCP_AUTH_TOKEN:
             return await call_next(request)
         auth = request.headers.get("authorization", "")
         expected = f"Bearer {config.MCP_AUTH_TOKEN}"
@@ -661,7 +664,12 @@ def build_app() -> Starlette:
     mcp_app = mcp.http_app(path="/mcp")
     wrapped_mcp = StripN8nEnvelopeMiddleware(mcp_app)
     return Starlette(
-        routes=[Mount("/", app=wrapped_mcp)],
+        routes=[
+            # Panel de administración (sesión propia por contraseña).
+            *admin.routes(),
+            # Catch-all: MCP server (bearer auth) montado en /mcp.
+            Mount("/", app=wrapped_mcp),
+        ],
         middleware=[Middleware(BearerAuthMiddleware)],
         lifespan=mcp_app.lifespan,
     )

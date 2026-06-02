@@ -74,12 +74,39 @@ código). Incluye descripción, FAQs y precios placeholder a completar:
 | `kommo_agregar_nota`            | Dejar una nota en el historial del lead.              |
 | `kommo_crear_tarea`             | Crear tarea (recordatorio) para el responsable.       |
 
+## Panel de administración web
+
+Además del MCP, el mismo servidor expone un **panel web** en `/admin` para
+gestionar el negocio sin tocar la base ni la API:
+
+- **Dashboard**: total de leads y conteo por etapa del pipeline.
+- **Leads**: tabla con filtro por clasificación, alta manual, edición de todos
+  los campos, cambio de etapa, historial de eventos y presupuestos por lead,
+  y baja.
+
+Auth propia por **contraseña** (cookie de sesión firmada), independiente del
+bearer token del MCP. Configurar en `.env`:
+
+```
+ADMIN_PASSWORD=una-clave-fuerte
+ADMIN_SESSION_SECRET=          # opcional, openssl rand -hex 32
+```
+
+En local queda en `http://localhost:8765/admin`. En el VPS se sirve por el
+mismo Nginx (ver el `location /admin` en `deploy/nginx.conf.example`):
+`https://tu-dominio.com/admin`.
+
+> El panel está pensado para **escalar**: sumar un módulo nuevo (catálogo,
+> config, system prompt, tester de tools) es agregar una entrada a `NAV` y su
+> `Route` en `src/admin.py`.
+
 ## Estructura
 
 ```
 .
-├── server.py                # FastMCP server + bearer auth
+├── server.py                # FastMCP server + bearer auth + panel /admin
 ├── src/
+│   ├── admin.py             # Panel web de administración (/admin)
 │   ├── catalogo.py          # Carga del YAML
 │   ├── config.py            # .env
 │   ├── cuit.py              # Validación CUIT

@@ -380,10 +380,14 @@ async def api_mensajes(request):
         limit = int(request.query_params.get("limit", "500"))
     except ValueError:
         limit = 500
-    return JSONResponse({
-        "mensajes": store.listar_mensajes(clasificacion=clasif, producto=producto, limit=limit),
-        "resumen": store.resumen(),
-    })
+    try:
+        store.init_db()  # defensivo: asegura las tablas aunque el proceso sea viejo
+        return JSONResponse({
+            "mensajes": store.listar_mensajes(clasificacion=clasif, producto=producto, limit=limit),
+            "resumen": store.resumen(),
+        })
+    except Exception as e:  # noqa: BLE001 — exponemos el detalle para diagnosticar
+        return JSONResponse({"error": type(e).__name__, "detalle": str(e)}, status_code=500)
 
 
 def build_app() -> Starlette:

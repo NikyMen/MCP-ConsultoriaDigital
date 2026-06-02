@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT_DIR / "data"
 PRODUCTOS_YAML = DATA_DIR / "productos.yaml"
+DB_PATH = DATA_DIR / "leads.db"
 
 load_dotenv(ROOT_DIR / ".env")
 

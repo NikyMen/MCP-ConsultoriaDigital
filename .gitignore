@@ -12,6 +12,11 @@ env/
 .env.*
 !.env.example
 
+# Base de datos local (datos de clientes — no versionar)
+*.db
+*.sqlite
+*.sqlite3
+
 # Logs
 *.log
 logs/

@@ -9,13 +9,18 @@ from dotenv import load_dotenv
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT_DIR / "data"
 PRODUCTOS_YAML = DATA_DIR / "productos.yaml"
-DB_PATH = DATA_DIR / "leads.db"
+PRESUPUESTOS_DIR = DATA_DIR / "presupuestos"
 
 load_dotenv(ROOT_DIR / ".env")
 
 MCP_HOST = os.getenv("MCP_HOST", "0.0.0.0")
 MCP_PORT = int(os.getenv("MCP_PORT", "8765"))
 MCP_AUTH_TOKEN = os.getenv("MCP_AUTH_TOKEN", "")
+
+# URL pública base desde donde se sirven los PDFs de presupuesto (sin barra
+# final). Si está seteada, el MCP devuelve la URL completa del PDF a enviar.
+# Ej: https://tu-dominio.com/presupuestos
+PRESUPUESTOS_BASE_URL = os.getenv("PRESUPUESTOS_BASE_URL", "").rstrip("/")
 
 EMPRESA_NOMBRE = os.getenv("EMPRESA_NOMBRE", "Consultoría Digital")
 EMPRESA_CUIT = os.getenv("EMPRESA_CUIT", "")

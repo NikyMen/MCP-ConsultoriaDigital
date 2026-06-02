@@ -39,6 +39,24 @@ def claves_productos() -> list[str]:
     return list(productos().keys())
 
 
+def presupuestos() -> dict[str, dict[str, Any]]:
+    """Catálogo de presupuestos en PDF (clave -> {archivo, etiqueta, cubre})."""
+    return cargar().get("presupuestos", {})
+
+
+def presupuesto(clave: str) -> dict[str, Any] | None:
+    return presupuestos().get(clave)
+
+
+def presupuesto_de_producto(clave_producto: str) -> str | None:
+    """Devuelve la clave del presupuesto asociado a un producto, o None si el
+    producto no tiene PDF estándar (p. ej. desarrollo a medida)."""
+    p = producto(clave_producto)
+    if not p:
+        return None
+    return p.get("presupuesto")
+
+
 def identificar_por_texto(texto: str) -> list[tuple[str, int]]:
     """Devuelve [(clave_producto, score)] ordenado por matches de keywords."""
     if not texto:

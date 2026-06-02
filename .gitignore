@@ -17,6 +17,9 @@ env/
 *.sqlite
 *.sqlite3
 
+# PDFs de presupuesto (tienen precios — no versionar, subir al VPS aparte)
+data/presupuestos/*.pdf
+
 # Logs
 *.log
 logs/

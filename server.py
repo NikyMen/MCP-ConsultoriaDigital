@@ -1,8 +1,8 @@
 """
 MCP server de Consultoría Digital.
 
-Servidor MCP *sin estado*: solo expone información del catálogo de productos
-y utilidades (validación de CUIT, system prompt). No persiste leads ni chats.
+Servidor MCP *sin estado*: solo expone información del catálogo de productos,
+los PDFs de presupuesto y la validación de CUIT. No persiste leads ni chats.
 
 Exposición:
     - Transporte HTTP (streamable-http) en MCP_HOST:MCP_PORT, path /mcp/
@@ -34,19 +34,17 @@ from starlette.middleware import Middleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 from starlette.routing import Mount
+from starlette.staticfiles import StaticFiles
 
 from src import (
     catalogo,
     config,
     cuit as cuit_mod,
-    leads,
 )
-from src.db import init_db
 
 # ---------------------------------------------------------------------------
 # Inicialización
 # ---------------------------------------------------------------------------
-init_db()
 mcp = FastMCP(name="Consultoria Digital MCP")
 
 
@@ -97,9 +95,10 @@ def info_producto(datos: ProductoKeyInput) -> dict[str, Any]:
         "integraciones": p.get("integraciones", []),
         "ideal_para": p.get("ideal_para"),
         "incluye": p.get("incluye", []),
-        "precio_desde": p.get("precio_desde"),
-        "precio_moneda": p.get("precio_moneda"),
-        "precio_unidad": p.get("precio_unidad"),
+        # Sin precios: la cotización vive solo en el PDF de presupuesto.
+        # Usá la tool `presupuesto_pdf` para saber qué PDF enviar.
+        "tiene_presupuesto_pdf": bool(p.get("presupuesto")),
+        "nota_precio": "Los precios no se dicen por chat: se envían en el PDF de presupuesto (tool presupuesto_pdf).",
     }
 
 
@@ -126,6 +125,65 @@ def identificar_producto_interes(datos: TextoClienteInput) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# Tools: presupuestos (PDF a enviar) — el MCP NO cotiza ni dice precios
+# ---------------------------------------------------------------------------
+
+def _presupuesto_payload(clave_presupuesto: str) -> dict[str, Any] | None:
+    """Arma el item del PDF a enviar: archivo, etiqueta y (si hay base URL) la URL pública."""
+    pres = catalogo.presupuesto(clave_presupuesto)
+    if not pres:
+        return None
+    archivo = pres.get("archivo")
+    item: dict[str, Any] = {
+        "clave": clave_presupuesto,
+        "archivo": archivo,
+        "etiqueta": pres.get("etiqueta"),
+        "cubre": pres.get("cubre", []),
+    }
+    if config.PRESUPUESTOS_BASE_URL and archivo:
+        item["url"] = f"{config.PRESUPUESTOS_BASE_URL}/{archivo}"
+    return item
+
+
+@mcp.tool
+def presupuesto_pdf(datos: ProductoKeyInput) -> dict[str, Any]:
+    """Devuelve el NOMBRE del PDF de presupuesto que hay que enviarle al lead
+    según el producto que le interesa. NO devuelve precios ni montos: la
+    cotización vive solo dentro del PDF. Si el producto no tiene PDF estándar
+    (p. ej. desarrollo a medida), avisa que se cotiza tras un relevamiento.
+    Usá `archivo` (y `url` si está disponible) para que n8n adjunte/envíe el PDF.
+    """
+    if datos.producto not in catalogo.claves_productos():
+        return {"error": f"Producto '{datos.producto}' no encontrado", "claves_validas": catalogo.claves_productos()}
+    clave_pres = catalogo.presupuesto_de_producto(datos.producto)
+    if not clave_pres:
+        return {
+            "producto": datos.producto,
+            "hay_pdf": False,
+            "motivo": "Este servicio se cotiza a medida tras un relevamiento sin cargo; no hay PDF estándar.",
+        }
+    item = _presupuesto_payload(clave_pres)
+    if not item:
+        return {
+            "producto": datos.producto,
+            "hay_pdf": False,
+            "error": f"El producto apunta al presupuesto '{clave_pres}' pero no está definido en el catálogo.",
+        }
+    return {"producto": datos.producto, "hay_pdf": True, "presupuesto": item}
+
+
+@mcp.tool
+def presupuestos_disponibles() -> dict[str, Any]:
+    """Lista todos los PDFs de presupuesto disponibles, con su nombre de archivo,
+    etiqueta y qué productos cubre cada uno."""
+    return {
+        "presupuestos": [
+            _presupuesto_payload(clave) for clave in catalogo.presupuestos().keys()
+        ]
+    }
+
+
+# ---------------------------------------------------------------------------
 # Tools: CUIT
 # ---------------------------------------------------------------------------
 
@@ -142,104 +200,6 @@ def validar_cuit(datos: CuitInput) -> dict[str, Any]:
         "valido": cuit_mod.es_valido(datos.cuit),
         "formateado": cuit_mod.formatear(datos.cuit),
     }
-
-
-# ---------------------------------------------------------------------------
-# Tools: leads (guardado + calificación + notas)
-# ---------------------------------------------------------------------------
-
-class RegistrarLeadInput(LooseModel):
-    telefono: str = Field(..., description="Teléfono / wa_id del lead (clave única).")
-    nombre: str | None = None
-    cuit: str | None = Field(None, description="CUIT que dio el cliente (empresa o personal).")
-    cuit_valido: bool | None = Field(None, description="True si el CUIT ya fue validado con validar_cuit.")
-    producto_interes: str | None = Field(
-        None, description="Clave del producto: gestion_redes, pauta_meta, crm, concilia, turneria, desarrollo_software."
-    )
-    clasificacion: str | None = Field(
-        None,
-        description="NUEVO | INTERESADO | CALIFICADO | PRESUPUESTO_ENVIADO | REUNION_AGENDADA | DESCARTADO.",
-    )
-    nota: str | None = Field(
-        None,
-        description="Nota/resumen de la conversación. Reemplaza la nota anterior; mandá el resumen actualizado completo.",
-    )
-    mensaje: str | None = Field(
-        None, description="Opcional: último mensaje del cliente a guardar en el historial de chat."
-    )
-
-
-@mcp.tool
-def registrar_lead(datos: RegistrarLeadInput) -> dict[str, Any]:
-    """Crea o actualiza un lead (upsert por teléfono). Llamala en cada turno para
-    guardar quién es, su CUIT, en qué está interesado y la nota de la conversación.
-    Solo pisa los campos que mandás; el resto queda como estaba.
-    """
-    if datos.clasificacion and datos.clasificacion not in leads.VALIDAS:
-        return {"error": f"clasificacion inválida: {datos.clasificacion}", "validas": sorted(leads.VALIDAS)}
-    if datos.producto_interes and datos.producto_interes not in catalogo.claves_productos():
-        return {"error": f"producto_interes inválido: {datos.producto_interes}", "validos": catalogo.claves_productos()}
-    campos = datos.model_dump()
-    mensaje = campos.pop("mensaje", None)
-    lead = leads.upsert(**campos)
-    if mensaje:
-        leads.guardar_mensaje(lead["id"], "cliente", mensaje)
-    return {"lead": lead}
-
-
-class ActualizarNotaInput(LooseModel):
-    telefono: str = Field(..., description="Teléfono / wa_id del lead.")
-    nota: str = Field(..., description="Resumen actualizado de la conversación (reemplaza la nota previa).")
-
-
-@mcp.tool
-def actualizar_nota(datos: ActualizarNotaInput) -> dict[str, Any]:
-    """Actualiza SOLO la nota de calificación del lead (resumen de en qué quedó la charla)."""
-    lead = leads.upsert(telefono=datos.telefono, nota=datos.nota)
-    return {"lead": lead}
-
-
-class GuardarMensajeInput(LooseModel):
-    telefono: str = Field(..., description="Teléfono / wa_id del lead (se crea si no existe).")
-    texto: str = Field(..., description="Contenido del mensaje a guardar.")
-    rol: str = Field("cliente", description="Quién escribió: 'cliente', 'asistente' o 'sistema'.")
-
-
-@mcp.tool
-def guardar_mensaje(datos: GuardarMensajeInput) -> dict[str, Any]:
-    """Guarda un mensaje del chat en el historial del lead (cliente y asistente)."""
-    rol = datos.rol.lower().strip()
-    if rol not in leads.ROLES_MENSAJE:
-        return {"error": f"rol inválido: {datos.rol}", "validos": sorted(leads.ROLES_MENSAJE)}
-    lead = leads.buscar_por_telefono(datos.telefono) or leads.upsert(telefono=datos.telefono)
-    mid = leads.guardar_mensaje(lead["id"], rol, datos.texto)
-    return {"mensaje_id": mid, "lead_id": lead["id"]}
-
-
-class TelefonoInput(LooseModel):
-    telefono: str = Field(..., description="Teléfono / wa_id del lead.")
-
-
-@mcp.tool
-def estado_por_telefono(datos: TelefonoInput) -> dict[str, Any]:
-    """Estado COMPLETO de un lead por teléfono: datos + CUIT + interés + nota +
-    historial de chat. Usala al inicio del turno para recuperar todo el contexto.
-    """
-    estado = leads.estado_completo(datos.telefono)
-    if not estado:
-        return {"encontrado": False, "lead": None}
-    return {"encontrado": True, **estado}
-
-
-class ListarLeadsInput(LooseModel):
-    clasificacion: str | None = Field(None, description="Filtro opcional por estado de calificación.")
-    limit: int = 100
-
-
-@mcp.tool
-def listar_leads(datos: ListarLeadsInput) -> dict[str, Any]:
-    """Lista los últimos leads, opcionalmente filtrando por clasificación."""
-    return {"leads": leads.listar(clasificacion=datos.clasificacion, limit=datos.limit)}
 
 
 # ---------------------------------------------------------------------------
@@ -353,11 +313,23 @@ class StripN8nEnvelopeMiddleware:
 def build_app() -> Starlette:
     mcp_app = mcp.http_app(path="/mcp")
     wrapped_mcp = StripN8nEnvelopeMiddleware(mcp_app)
+
+    routes = []
+    # PDFs de presupuesto servidos como archivos estáticos en /presupuestos.
+    # Público (el BearerAuthMiddleware solo protege /mcp) para que WaSender /
+    # WhatsApp puedan descargarlos por URL. Se monta solo si la carpeta existe.
+    if config.PRESUPUESTOS_DIR.is_dir():
+        routes.append(
+            Mount(
+                "/presupuestos",
+                app=StaticFiles(directory=str(config.PRESUPUESTOS_DIR)),
+            )
+        )
+    # MCP server (bearer auth) montado en /mcp (el "/" captura todo lo demás).
+    routes.append(Mount("/", app=wrapped_mcp))
+
     return Starlette(
-        routes=[
-            # MCP server (bearer auth) montado en /mcp.
-            Mount("/", app=wrapped_mcp),
-        ],
+        routes=routes,
         middleware=[Middleware(BearerAuthMiddleware)],
         lifespan=mcp_app.lifespan,
     )

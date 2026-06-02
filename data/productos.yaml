@@ -1,10 +1,16 @@
-# Catálogo editable de productos. Modificá precios, FAQs y descripciones
-# y luego hacé `git pull` + restart del servicio en el VPS.
+# Catálogo editable de productos. Modificá descripciones y FAQs y luego hacé
+# `git pull` + restart del servicio en el VPS.
+#
+# IMPORTANTE: este catálogo NO contiene precios. Los precios y la cotización
+# viven únicamente en los PDFs de presupuesto (ver sección `presupuestos` al
+# final). El asistente nunca debe inventar ni decir montos por chat: solo
+# identifica el producto y mandar el PDF que corresponde.
 
 productos:
 
   gestion_redes:
     nombre: "Gestión de Redes Sociales"
+    presupuesto: rrss_pauta
     keywords:
       - redes
       - social
@@ -39,12 +45,9 @@ productos:
     ideal_para: >-
       Empresas y emprendedores con CUIT que quieren tener presencia profesional
       en redes sociales sin destinar tiempo interno a producir contenido.
-    precio_desde: 650000   # $650.000/mes IVA incluido (ref. presupuesto)
-    precio_moneda: "ARS"
-    precio_unidad: "mensual (IVA incluido)"
     faqs:
       - pregunta: "¿Cuánto sale la gestión de redes?"
-        respuesta: "El plan de gestión de redes arranca en $650.000 por mes, con IVA incluido y Factura A. Incluye planificación, producción y edición de contenido para Facebook e Instagram. Lo ajustamos a tus objetivos en la reunión."
+        respuesta: "Te preparo el presupuesto con todos los valores y te lo paso en PDF. Trabajamos con Factura A. Es un plan mensual que ajustamos a tus objetivos en una reunión."
       - pregunta: "¿Cuántos posteos incluye por mes?"
         respuesta: "Trabajamos con planes personalizados según objetivos. En general entre 8 y 20 piezas mensuales combinando reels, carruseles y placas."
       - pregunta: "¿Ustedes graban el contenido o lo tengo que mandar yo?"
@@ -54,6 +57,7 @@ productos:
 
   pauta_meta:
     nombre: "Pauta Publicitaria en Meta (Facebook + Instagram)"
+    presupuesto: rrss_pauta
     keywords:
       - pauta
       - publicidad
@@ -79,7 +83,6 @@ productos:
       - Creación de anuncios y seguimiento de resultados
       - Gestión de campañas BONIFICADA al contratar Gestión de RRSS
       - Crédito publicitario en Meta pagado por transferencia con Factura A
-      - Carga mínima equivalente a 200 USD en cuenta + 30% de fee de agencia
       - Reportes de resultados
     problema: >-
       Pagar pauta con tarjeta personal no permite deducir IVA ni Ganancias, no
@@ -94,14 +97,11 @@ productos:
     ideal_para: >-
       Empresas que ya invierten en pauta o quieren empezar, y que necesitan
       facturar la inversión publicitaria y profesionalizar sus campañas en Meta.
-    precio_desde: 0   # Gestión bonificada con RRSS; crédito = 200 USD + 30% fee
-    precio_moneda: "ARS"
-    precio_unidad: "Gestión BONIFICADA al contratar RRSS · Crédito: mín. 200 USD + 30% fee de agencia"
     faqs:
       - pregunta: "¿Cuánto sale que me manejen la pauta?"
-        respuesta: "La gestión de campañas en Meta va BONIFICADA si contratás nuestro servicio de Gestión de Redes. Aparte está el crédito publicitario, que se carga desde un mínimo equivalente a 200 USD + 30% de fee de agencia, y lo pagás por transferencia con Factura A."
+        respuesta: "La gestión de campañas va BONIFICADA si contratás Gestión de Redes. Aparte está el crédito publicitario que pagás por transferencia con Factura A. Te paso el presupuesto en PDF con el detalle de la inversión."
       - pregunta: "¿Cuánto tengo que invertir mínimo en pauta?"
-        respuesta: "La carga mínima equivale a 200 USD en cuenta, más un 30% de fee de agencia. A partir de ahí lo escalamos según objetivos y rubro, lo definimos en la reunión."
+        respuesta: "Lo escalamos según objetivos y rubro. El detalle de la carga mínima y el fee de agencia va en el presupuesto en PDF, y lo terminamos de definir en la reunión."
       - pregunta: "¿Cómo es lo de la Factura A y la línea de crédito en Meta?"
         respuesta: "Tenemos línea de crédito propia en Meta. Vos nos transferís y nosotros pagamos la pauta. Te emitimos Factura A por gestión + inversión, así deducís IVA y Ganancias y dejás de pagar con tarjeta personal."
       - pregunta: "¿En cuánto tiempo veo resultados?"
@@ -109,6 +109,7 @@ productos:
 
   crm:
     nombre: "Automatización con CRM"
+    presupuesto: rrss_crm_pauta
     keywords:
       - crm
       - automatizacion
@@ -150,12 +151,9 @@ productos:
     ideal_para: >-
       Empresas con flujo de consultas por varios canales que quieren ordenar su
       proceso comercial y automatizar el seguimiento de leads.
-    precio_desde: 1850000   # Setup único $1.850.000 + soporte $363.000/mes (IVA incl.)
-    precio_moneda: "ARS"
-    precio_unidad: "setup único $1.850.000 (pago único) + soporte $363.000/mes — IVA incluido"
     faqs:
       - pregunta: "¿Cuánto cuesta implementar el CRM?"
-        respuesta: "La configuración y puesta en marcha de Kommo CRM es un pago único de $1.850.000 (IVA incluido), e incluye setup, diseño del proceso comercial, automatizaciones y capacitación. Después hay un soporte mensual de $363.000 para ajustes y actualizaciones."
+        respuesta: "Es una configuración con un pago único de puesta en marcha más un soporte mensual. Te paso el presupuesto en PDF con todos los valores; incluye setup, diseño del proceso comercial, automatizaciones y capacitación."
       - pregunta: "¿Es un CRM propio o usan uno de terceros?"
         respuesta: "Trabajamos sobre Kommo, una plataforma robusta de la que somos socios oficiales, a la que sumamos nuestras automatizaciones y configuración para que quede a medida de tu operación."
       - pregunta: "¿Puede integrarse con WhatsApp?"
@@ -165,6 +163,7 @@ productos:
 
   concilia:
     nombre: "Concilia — Conciliación Bancaria con IA"
+    presupuesto: concilia
     keywords:
       - concilia
       - conciliacion
@@ -215,12 +214,9 @@ productos:
     ideal_para: >-
       Empresas con alto volumen de pagos y transferencias que pierden horas
       conciliando manualmente y quieren automatizar el proceso de punta a punta.
-    precio_desde: 1810000   # Setup único $1.810.000 + asistencia $360.000/mes (IVA incl.)
-    precio_moneda: "ARS"
-    precio_unidad: "setup único $1.810.000 (pago único) + asistencia $360.000/mes — IVA incluido"
     faqs:
       - pregunta: "¿Cuánto cuesta ConciliA?"
-        respuesta: "La configuración e implementación a medida es un pago único de $1.810.000 (IVA incluido): lo ajustamos 100% a tu proceso de conciliación, lo vinculamos con tu sistema de gestión y capacitamos a tu equipo. Después hay una asistencia mensual de $360.000 que incluye los servicios de estructura y soporte."
+        respuesta: "Es una implementación a medida con un pago único de configuración más una asistencia mensual. Te paso el presupuesto en PDF con todos los valores; lo ajustamos 100% a tu proceso, lo vinculamos con tu sistema de gestión y capacitamos a tu equipo."
       - pregunta: "¿Con qué bancos y ERPs se integra?"
         respuesta: "Trabajamos con los principales bancos argentinos y los ERPs más comunes. Lo evaluamos según tu stack en la reunión."
       - pregunta: "¿Cuánto tiempo lleva la implementación?"
@@ -228,6 +224,7 @@ productos:
 
   turneria:
     nombre: "Turnería — Gestión de Turnos para Salud"
+    presupuesto: turneria
     keywords:
       - turnos
       - turneria
@@ -272,12 +269,9 @@ productos:
     ideal_para: >-
       Desde consultorios y profesionales individuales hasta policonsultorios,
       clínicas y sanatorios con varios profesionales y consultorios.
-    precio_desde: 1850000   # Setup único $1.850.000 + asistencia $363.000/mes (IVA incl.)
-    precio_moneda: "ARS"
-    precio_unidad: "setup único $1.850.000 (pago único) + asistencia $363.000/mes — IVA incluido"
     faqs:
       - pregunta: "¿Cuánto cuesta TurnerIA?"
-        respuesta: "La configuración y creación del agente de IA para WhatsApp, integrado a tu sistema de gestión, es un pago único de $1.850.000 (IVA incluido). Después hay una asistencia mensual de $363.000 que cubre la estructura y los cambios en el funcionamiento del asistente."
+        respuesta: "Es la configuración del agente de IA con un pago único más una asistencia mensual. Te paso el presupuesto en PDF con todos los valores; incluye la creación del agente integrado a tu sistema de gestión."
       - pregunta: "¿Se integra con el sistema que ya uso?"
         respuesta: "Sí. Conectamos el agente de IA a tu sistema de gestión actual y a tu lista de pacientes, así seguís usando tu sistema pero con la atención automatizada por WhatsApp."
       - pregunta: "¿Sirve para un consultorio individual o solo para clínicas?"
@@ -289,6 +283,7 @@ productos:
 
   desarrollo_software:
     nombre: "Desarrollo de Software a Medida"
+    presupuesto: null   # Se cotiza a medida tras relevamiento; no hay PDF estándar
     keywords:
       - software
       - desarrollo
@@ -347,18 +342,54 @@ productos:
       Empresas que necesitan un sistema o automatización a medida que las
       herramientas estándar no resuelven, o que quieren integrar y automatizar
       procesos propios.
-    precio_desde: null   # A cotizar según alcance y complejidad del proyecto
-    precio_moneda: "ARS"
-    precio_unidad: "a cotizar según alcance del proyecto (relevamiento sin cargo)"
     faqs:
       - pregunta: "¿Qué tipo de software desarrollan?"
         respuesta: "Hacemos de todo a medida: desde un ERP o sistema de gestión completo hasta aplicaciones web, integraciones entre sistemas y automatizaciones complejas con n8n y agentes de IA. Lo adaptamos 100% a tu proceso."
       - pregunta: "¿Cuánto cuesta un desarrollo a medida?"
-        respuesta: "Depende del alcance y la complejidad del proyecto, así que lo cotizamos a medida. Hacemos un relevamiento inicial sin cargo para entender qué necesitás y pasarte una propuesta concreta."
+        respuesta: "Depende del alcance y la complejidad del proyecto, así que se cotiza a medida. Hacemos un relevamiento inicial sin cargo para entender qué necesitás y después pasamos una propuesta concreta."
       - pregunta: "¿Se integra con los sistemas que ya uso?"
         respuesta: "Sí. Nos especializamos en integrar y conectar sistemas que hoy no se hablan entre sí (ERPs, CRMs, bancos, APIs) y automatizar los procesos que los unen."
       - pregunta: "¿Pueden automatizar un proceso puntual o solo proyectos grandes?"
         respuesta: "Las dos cosas. Resolvemos desde una automatización puntual que te ahorra tareas manuales hasta el desarrollo de un sistema completo de gestión."
+
+# ---------------------------------------------------------------------------
+# Presupuestos en PDF
+# ---------------------------------------------------------------------------
+# Único lugar donde viven los precios: los PDFs. El asistente NO dice montos;
+# solo identifica qué PDF corresponde y devuelve su nombre de archivo para que
+# n8n lo adjunte/envíe.
+#
+# Guardá cada PDF en `data/presupuestos/` con EXACTAMENTE el nombre de `archivo`.
+# Si servís los PDFs por HTTP (ver PRESUPUESTOS_BASE_URL en .env), el MCP arma
+# la URL pública sumando base_url + archivo.
+presupuestos:
+
+  rrss_pauta:
+    archivo: "presupuesto-rrss-pauta.pdf"
+    etiqueta: "Presupuesto · Gestión de Redes + Pauta en Meta"
+    cubre:
+      - gestion_redes
+      - pauta_meta
+
+  rrss_crm_pauta:
+    archivo: "presupuesto-rrss-crm-pauta.pdf"
+    etiqueta: "Presupuesto · Redes + CRM + Pauta en Meta"
+    cubre:
+      - gestion_redes
+      - crm
+      - pauta_meta
+
+  concilia:
+    archivo: "presupuesto-concilia.pdf"
+    etiqueta: "Presupuesto · Plataforma ConciliA"
+    cubre:
+      - concilia
+
+  turneria:
+    archivo: "presupuesto-turneria.pdf"
+    etiqueta: "Presupuesto · TurnerIA (Gestión de Turnos)"
+    cubre:
+      - turneria
 
 # Criterios para identificar si una persona puede ser cliente
 criterios_cliente:
@@ -366,21 +397,3 @@ criterios_cliente:
   - "Empresa que ya invierte en comunicación digital o quiere empezar"
   - "Empresa que quiere dejar de pagar pauta con tarjeta y pasar a transferencia con Factura A"
   - "Empresa que busca automatizar procesos manuales del área administrativa o comercial"
-
-# Etapas de calificación del lead (según la consigna del negocio)
-clasificacion:
-  inicial:
-    nombre: "INICIAL"
-    descripcion: "Llegó por pauta. Aún no se identificó producto de interés."
-  producto_identificado:
-    nombre: "PRODUCTO_IDENTIFICADO"
-    descripcion: "El asistente identificó qué producto le interesa y respondió FAQs."
-  media:
-    nombre: "MEDIA"
-    descripcion: "Entregó CUIT y nombre de empresa: tenemos lo necesario para cotizar."
-  alta:
-    nombre: "ALTA"
-    descripcion: "Recibió el PDF de presupuesto y se le propuso una reunión."
-  descartado:
-    nombre: "DESCARTADO"
-    descripcion: "No cumple criterios para ser cliente (sin CUIT, fuera de alcance, etc.)."

@@ -6,8 +6,12 @@ Servidor MCP (Model Context Protocol) en Python que expone herramientas para el
 deploy en VPS de Hostinger.
 
 Es un servidor **sin estado**: ofrece a GPT información del catálogo de
-productos y la validación de CUIT para calificar leads según el flujo comercial.
+productos, la validación de CUIT y el **nombre del PDF de presupuesto** a enviar.
 No persiste leads ni conversaciones — eso lo maneja n8n / el CRM si hace falta.
+
+> **Precios:** el MCP **nunca dice montos por chat**. Los precios viven solo
+> dentro de los PDFs de presupuesto (`data/presupuestos/`). El asistente
+> identifica el producto y devuelve qué PDF mandar; el envío lo hace n8n.
 
 ## Flujo
 
@@ -21,7 +25,7 @@ WhatsApp → WaSender → n8n → GPT (con MCP Client) → MCP Server (este repo
 ## Productos
 
 Definidos en [`data/productos.yaml`](data/productos.yaml) (editable sin tocar
-código). Incluye descripción, FAQs y precios:
+código). Incluye descripción y FAQs (sin precios):
 
 - `gestion_redes` — Gestión de Redes Sociales
 - `pauta_meta` — Pauta Publicitaria en Meta
@@ -35,11 +39,29 @@ código). Incluye descripción, FAQs y precios:
 | Tool                            | Para qué sirve                                        |
 | ------------------------------- | ----------------------------------------------------- |
 | `productos_disponibles`         | Listar todos los productos.                           |
-| `info_producto`                 | Descripción detallada + qué incluye + precio desde.   |
+| `info_producto`                 | Descripción detallada + qué incluye (**sin precios**).|
 | `faqs_producto`                 | FAQs y respuestas oficiales del producto.             |
 | `identificar_producto_interes`  | Inferir producto desde el mensaje del lead.           |
+| `presupuesto_pdf`               | Nombre del PDF de presupuesto a enviar para un producto. |
+| `presupuestos_disponibles`      | Lista los PDFs de presupuesto y qué cubre cada uno.   |
 | `validar_cuit`                  | Validación de CUIT/CUIL argentino.                    |
 | `recargar_catalogo`             | Recargar `productos.yaml` sin reiniciar el server.    |
+
+### Presupuestos en PDF
+
+`presupuesto_pdf` recibe la clave de un producto y devuelve **solo el nombre del
+archivo** (y la `url` pública si configuraste `PRESUPUESTOS_BASE_URL`):
+
+```json
+{ "producto": "turneria", "hay_pdf": true,
+  "presupuesto": { "archivo": "presupuesto-turneria.pdf",
+                   "url": "https://tu-dominio.com/presupuestos/presupuesto-turneria.pdf" } }
+```
+
+Los PDFs van en [`data/presupuestos/`](data/presupuestos/) con el nombre exacto
+de `archivo`. El mapeo producto → PDF se edita en `productos.yaml`
+(`presupuesto:` por producto + sección `presupuestos:`). `desarrollo_software`
+no tiene PDF (devuelve `hay_pdf: false`: se cotiza a medida).
 
 ## Estructura
 
@@ -51,7 +73,10 @@ código). Incluye descripción, FAQs y precios:
 │   ├── config.py            # .env
 │   └── cuit.py              # Validación CUIT
 ├── data/
-│   └── productos.yaml       # ⇐ EDITAR precios y FAQs acá
+│   ├── productos.yaml       # ⇐ EDITAR descripciones, FAQs y mapeo de PDFs
+│   └── presupuestos/        # ⇐ PDFs de presupuesto (con precios)
+├── prompts/
+│   └── system_prompt.md     # ⇐ system prompt para el AI Agent de n8n
 ├── deploy/
 │   ├── consultoria-mcp.service
 │   ├── nginx.conf.example
@@ -153,9 +178,13 @@ Hace `git pull`, reinstala deps y reinicia el service.
 
 ## Pendientes que tenés que completar
 
-1. **Completar precios reales** en [`data/productos.yaml`](data/productos.yaml).
-2. **Configurar `.env`** con datos reales de la empresa (CUIT, web, etc.) y
-   generar un `MCP_AUTH_TOKEN` largo.
-3. **Comprar dominio o subdominio** apuntando al VPS Hostinger.
-4. **Workflow en n8n**: armar siguiendo `n8n/workflow-ejemplo.md`. Necesitás
-   credenciales de WaSender y OpenAI configuradas en n8n.
+1. **Subir los PDFs de presupuesto** a `data/presupuestos/` con los nombres de
+   archivo definidos en `productos.yaml` (ver
+   [`data/presupuestos/README.md`](data/presupuestos/README.md)).
+2. **Configurar `.env`**: datos de la empresa, `MCP_AUTH_TOKEN` largo y
+   `PRESUPUESTOS_BASE_URL` (ej. `https://tu-dominio.com/presupuestos`).
+3. **Pegar el system prompt** de [`prompts/system_prompt.md`](prompts/system_prompt.md)
+   en el nodo AI Agent de n8n.
+4. **Comprar dominio o subdominio** apuntando al VPS Hostinger.
+5. **Workflow en n8n**: armar siguiendo `n8n/workflow-ejemplo.md` (incluye el
+   envío del PDF). Necesitás credenciales de WaSender y OpenAI en n8n.

@@ -12,12 +12,6 @@ env/
 .env.*
 !.env.example
 
-# Datos locales
-data/leads.db
-data/leads.db-journal
-data/presupuestos/*.pdf
-!data/presupuestos/.gitkeep
-
 # Logs
 *.log
 logs/

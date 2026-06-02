@@ -22,15 +22,17 @@ productos:
       Incluye placas gráficas y contenido audiovisual. El cliente se
       desentiende de la tarea.
     incluye:
-      - Estrategia mensual de contenidos
-      - Producción audiovisual (grabación + edición)
-      - Diseño de placas gráficas
-      - Calendario y publicación
-      - Reportes mensuales
-    precio_desde: 0   # COMPLETAR
+      - Gestión de redes con planificación mensual (Facebook e Instagram)
+      - Producción y edición de videos de baja/media complejidad (reels)
+      - Diseño de piezas gráficas
+      - Contacto diario y permanente por grupo de WhatsApp
+      - Planificación, producción y edición de todo el contenido publicado
+    precio_desde: 650000   # $650.000/mes IVA incluido (ref. presupuesto)
     precio_moneda: "ARS"
-    precio_unidad: "mensual"
+    precio_unidad: "mensual (IVA incluido)"
     faqs:
+      - pregunta: "¿Cuánto sale la gestión de redes?"
+        respuesta: "El plan de gestión de redes arranca en $650.000 por mes, con IVA incluido y Factura A. Incluye planificación, producción y edición de contenido para Facebook e Instagram. Lo ajustamos a tus objetivos en la reunión."
       - pregunta: "¿Cuántos posteos incluye por mes?"
         respuesta: "Trabajamos con planes personalizados según objetivos. En general entre 8 y 20 piezas mensuales combinando reels, carruseles y placas."
       - pregunta: "¿Ustedes graban el contenido o lo tengo que mandar yo?"
@@ -62,17 +64,19 @@ productos:
       transferencia y recibe Factura A, deduciendo IVA y Ganancias, sin
       depender de la tarjeta.
     incluye:
-      - Estrategia de campañas
-      - Creatividad y copy
-      - Carga, optimización y seguimiento
+      - Creación de anuncios y seguimiento de resultados
+      - Gestión de campañas BONIFICADA al contratar Gestión de RRSS
+      - Crédito publicitario en Meta pagado por transferencia con Factura A
+      - Carga mínima equivalente a 200 USD en cuenta + 30% de fee de agencia
       - Reportes de resultados
-      - Pago por transferencia con Factura A (línea de crédito propia en Meta)
-    precio_desde: 0   # COMPLETAR (fee de gestión)
+    precio_desde: 0   # Gestión bonificada con RRSS; crédito = 200 USD + 30% fee
     precio_moneda: "ARS"
-    precio_unidad: "mensual + inversión publicitaria aparte"
+    precio_unidad: "Gestión BONIFICADA al contratar RRSS · Crédito: mín. 200 USD + 30% fee de agencia"
     faqs:
+      - pregunta: "¿Cuánto sale que me manejen la pauta?"
+        respuesta: "La gestión de campañas en Meta va BONIFICADA si contratás nuestro servicio de Gestión de Redes. Aparte está el crédito publicitario, que se carga desde un mínimo equivalente a 200 USD + 30% de fee de agencia, y lo pagás por transferencia con Factura A."
       - pregunta: "¿Cuánto tengo que invertir mínimo en pauta?"
-        respuesta: "Depende del objetivo y la zona, pero como base sugerimos pisos para que las campañas salgan de la fase de aprendizaje. Te lo definimos en la reunión según tu rubro."
+        respuesta: "La carga mínima equivale a 200 USD en cuenta, más un 30% de fee de agencia. A partir de ahí lo escalamos según objetivos y rubro, lo definimos en la reunión."
       - pregunta: "¿Cómo es lo de la Factura A y la línea de crédito en Meta?"
         respuesta: "Tenemos línea de crédito propia en Meta. Vos nos transferís y nosotros pagamos la pauta. Te emitimos Factura A por gestión + inversión, así deducís IVA y Ganancias y dejás de pagar con tarjeta personal."
       - pregunta: "¿En cuánto tiempo veo resultados?"
@@ -98,17 +102,20 @@ productos:
       ningún lead se queda sin respuesta y el cliente mejora sus cierres
       porque no se le escapan oportunidades.
     incluye:
-      - Implementación y configuración del CRM
-      - Integración de canales (IG, TikTok, web, WhatsApp, FB)
-      - Flujos de automatización
-      - Capacitación al equipo
-      - Soporte mensual
-    precio_desde: 0   # COMPLETAR
+      - Configuración inicial de Kommo CRM, setup y puesta en marcha
+      - Diseño del proceso comercial junto a tu equipo
+      - Configuración de automatizaciones y salesbot
+      - Capacitación al equipo de trabajo
+      - Reuniones de ajuste, corrección y seguimiento
+      - Soporte y asistencia mensual (ajustes y actualizaciones)
+    precio_desde: 1850000   # Setup único $1.850.000 + soporte $363.000/mes (IVA incl.)
     precio_moneda: "ARS"
-    precio_unidad: "setup + mensual"
+    precio_unidad: "setup único $1.850.000 (pago único) + soporte $363.000/mes — IVA incluido"
     faqs:
+      - pregunta: "¿Cuánto cuesta implementar el CRM?"
+        respuesta: "La configuración y puesta en marcha de Kommo CRM es un pago único de $1.850.000 (IVA incluido), e incluye setup, diseño del proceso comercial, automatizaciones y capacitación. Después hay un soporte mensual de $363.000 para ajustes y actualizaciones."
       - pregunta: "¿Es un CRM propio o usan uno de terceros?"
-        respuesta: "Trabajamos sobre una plataforma robusta a la que sumamos nuestras automatizaciones y configuración para que quede a medida de tu operación."
+        respuesta: "Trabajamos sobre Kommo, una plataforma robusta de la que somos socios oficiales, a la que sumamos nuestras automatizaciones y configuración para que quede a medida de tu operación."
       - pregunta: "¿Puede integrarse con WhatsApp?"
         respuesta: "Sí. Centralizamos las conversaciones de WhatsApp, Instagram, Facebook, TikTok y formularios web en un solo lugar."
       - pregunta: "¿Quién atiende los chats: ustedes o mi equipo?"
@@ -136,14 +143,17 @@ productos:
       y cotejarlos con el sistema de gestión (ERP) y el banco. Personalizado
       y vinculado al sistema del cliente.
     incluye:
-      - Integración con bancos y ERP del cliente
-      - Reglas de matching personalizadas con IA
-      - Reportes de partidas conciliadas / pendientes
-      - Soporte
-    precio_desde: 0   # COMPLETAR
+      - Implementación a medida del software ConciliA, 100% ajustado a tu proceso
+      - Vínculo con tu sistema de gestión (ERP)
+      - Capacitación a tu equipo para operar la herramienta
+      - Servicios de estructura (VPS, n8n, webhook de integración con Kommo)
+      - Asistencia mensual y cambios en el funcionamiento del asistente
+    precio_desde: 1810000   # Setup único $1.810.000 + asistencia $360.000/mes (IVA incl.)
     precio_moneda: "ARS"
-    precio_unidad: "setup + mensual"
+    precio_unidad: "setup único $1.810.000 (pago único) + asistencia $360.000/mes — IVA incluido"
     faqs:
+      - pregunta: "¿Cuánto cuesta ConciliA?"
+        respuesta: "La configuración e implementación a medida es un pago único de $1.810.000 (IVA incluido): lo ajustamos 100% a tu proceso de conciliación, lo vinculamos con tu sistema de gestión y capacitamos a tu equipo. Después hay una asistencia mensual de $360.000 que incluye los servicios de estructura y soporte."
       - pregunta: "¿Con qué bancos y ERPs se integra?"
         respuesta: "Trabajamos con los principales bancos argentinos y los ERPs más comunes. Lo evaluamos según tu stack en la reunión."
       - pregunta: "¿Cuánto tiempo lleva la implementación?"
@@ -167,20 +177,25 @@ productos:
       - salud
       - consultorio
     descripcion: >-
-      Software de turnos para clínicas, policonsultorios, sanatorios y
-      profesionales médicos. Reduce un 95% la tarea manual de agendar,
-      revisar y confirmar turnos. Atiende 24/7, cobra la consulta por
-      adelantado, recomienda estudios y envía recordatorios.
+      TurnerIA: asistente de turnos con Inteligencia Artificial por WhatsApp,
+      100% adaptado a tu consultorio o clínica. Un agente de IA conectado a tu
+      sistema de gestión que atiende 24/7, toma, reprograma y cancela turnos,
+      y envía recordatorios automáticos, reduciendo la tarea manual de la
+      secretaría.
     incluye:
-      - Agenda 24/7 para pacientes
-      - Confirmaciones y recordatorios automáticos
-      - Cobro online de consultas
-      - Recomendaciones de estudios
-      - Panel para profesionales y secretarías
-    precio_desde: 0   # COMPLETAR
+      - Agente de IA para WhatsApp atendiendo 24/7
+      - Toma, reprogramación y cancelación de turnos
+      - Recordatorios automáticos a cada paciente
+      - Integración con tu sistema de gestión y lista de pacientes
+      - Asistencia mensual y cambios en el funcionamiento del asistente
+    precio_desde: 1850000   # Setup único $1.850.000 + asistencia $363.000/mes (IVA incl.)
     precio_moneda: "ARS"
-    precio_unidad: "setup + mensual"
+    precio_unidad: "setup único $1.850.000 (pago único) + asistencia $363.000/mes — IVA incluido"
     faqs:
+      - pregunta: "¿Cuánto cuesta TurnerIA?"
+        respuesta: "La configuración y creación del agente de IA para WhatsApp, integrado a tu sistema de gestión, es un pago único de $1.850.000 (IVA incluido). Después hay una asistencia mensual de $363.000 que cubre la estructura y los cambios en el funcionamiento del asistente."
+      - pregunta: "¿Se integra con el sistema que ya uso?"
+        respuesta: "Sí. Conectamos el agente de IA a tu sistema de gestión actual y a tu lista de pacientes, así seguís usando tu sistema pero con la atención automatizada por WhatsApp."
       - pregunta: "¿Sirve para un consultorio individual o solo para clínicas?"
         respuesta: "Funciona para ambos: desde profesionales individuales hasta policonsultorios y sanatorios con varios profesionales y consultorios."
       - pregunta: "¿Puede cobrar la consulta por adelantado?"

@@ -10,7 +10,7 @@ n8n: normalizar payload (telefono, texto, nombre)
     │
     ▼
 n8n: AI Agent (modelo GPT-4o/4o-mini)
-    ├── System prompt: el que devuelve `prompt_sistema` del MCP
+    ├── System prompt: configurado en el propio nodo del AI Agent
     └── Tools: MCP Client node → http(s)://VPS/mcp/  (Authorization: Bearer ...)
     │
     ▼
@@ -27,8 +27,8 @@ n8n: WaSender (enviar respuesta)
 
 2. **AI Agent node (OpenAI Functions / Tools agent)**
    - Modelo: gpt-4o o gpt-4o-mini.
-   - System message: llamar primero el tool `prompt_sistema` y pegar la respuesta
-     ahí, o cachearlo en una variable de entorno de n8n.
+   - System message: pegar el prompt del agente comercial directamente en el
+     nodo (el MCP ya no lo expone como tool).
    - Memory: usar `Window Buffer Memory` con sessionKey = `telefono` del lead
      para mantener contexto por conversación.
    - User message: el texto recibido por WaSender.
@@ -39,14 +39,15 @@ n8n: WaSender (enviar respuesta)
 
 4. **WaSender (OUT)**
    - Tras la respuesta del agente, enviar el texto al `telefono`.
-   - Si el agente devuelve un link de presupuesto, mandarlo en un segundo
-     mensaje (o adjuntar el PDF si tu plan de WaSender lo permite).
 
 ## Tips
 
-- El primer mensaje del agente para cada nuevo lead debería llamar
-  `buscar_lead(telefono)` para saber si ya existe estado previo.
-- Después de cada turno relevante, `registrar_lead` con los datos nuevos.
-- `generar_presupuesto` solo cuando el lead ya tiene CUIT válido + empresa.
-- Antes de pasar el lead a `ALTA`, el agente ya envió el PDF y propuso
-  reunión (el tool `generar_presupuesto` setea esta clasificación automáticamente).
+- El MCP es **sin estado**: no guarda conversaciones ni leads. El contexto por
+  conversación lo mantiene n8n con `Window Buffer Memory` (sessionKey =
+  `telefono`).
+- Antes de responder algo de un producto, el agente debería consultar
+  `info_producto` / `faqs_producto` en vez de responder de memoria.
+- `validar_cuit` cuando el lead pasa un CUIT, para confirmar que es válido.
+- La cotización y la reunión las coordina el equipo comercial humano (el MCP ya
+  no genera PDFs ni agenda). Si querés persistir leads o sincronizar con un CRM,
+  hacelo con nodos de n8n.

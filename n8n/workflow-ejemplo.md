@@ -15,20 +15,21 @@ WaSender (webhook IN)
     └── Tools: MCP Client → https://VPS/mcp/  (Authorization: Bearer ...)
     │
     ▼
-[3] Code: parsear marcador [[ENVIAR_PDF: archivo]]
-    │            ├── texto limpio (sin el marcador)
-    │            └── archivo del PDF (o vacío)
+[3] Code: parsear el JSON del AI Agent { respuesta, pdf }
+    │            ├── respuesta → texto para el cliente
+    │            └── pdf → clave del presupuesto (o vacío) → archivo + URL
     │
     ├──────────────► [4a] WaSender: enviar TEXTO al telefono
     │
-    ▼ (IF archivo != "")
+    ▼ (IF pdf != "")
 [4b] WaSender: enviar DOCUMENTO (PDF) al telefono
 ```
 
 La idea central: **el MCP nunca dice precios y nunca arma el presupuesto**. El
-AI Agent solo decide *qué PDF* corresponde (vía la tool `presupuesto_pdf`) y lo
-**señala** con un marcador al final de su respuesta. n8n detecta ese marcador,
-manda el PDF y borra el marcador del texto antes de enviárselo al cliente.
+AI Agent solo decide *qué PDF* corresponde (vía la tool `presupuesto_pdf`) y
+devuelve un **objeto JSON con dos campos**: `respuesta` (lo que ve el cliente) y
+`pdf` (la clave del presupuesto a enviar, o vacío). n8n separa ambos: manda el
+texto y, si `pdf` no está vacío, adjunta el PDF correspondiente.
 
 ## Pasos para configurarlo
 
@@ -45,59 +46,92 @@ manda el PDF y borra el marcador del texto antes de enviárselo al cliente.
   por conversación; el MCP es sin estado).
 - User message: el texto recibido por WaSender.
 
-El prompt instruye al agente a, cuando corresponde enviar presupuesto, terminar
-su respuesta con una línea:
+El prompt instruye al agente a responder **siempre** con un objeto JSON de dos
+campos:
 
+```json
+{ "respuesta": "texto para el cliente", "pdf": "turneria" }
 ```
-[[ENVIAR_PDF: presupuesto-turneria.pdf]]
-```
 
-donde el nombre sale de la tool `presupuesto_pdf`.
+`pdf` es la **clave del presupuesto** (vacío si no corresponde enviar). Hay 4
+claves posibles: `rrss_pauta`, `rrss_crm_pauta`, `concilia`, `turneria`.
 
-### 3. Code node — separar texto y PDF
+> Opción recomendada: activá el **Structured Output Parser** del AI Agent con el
+> esquema `{ respuesta: string, pdf: string }` para que n8n te entregue el JSON ya
+> parseado. Si no lo usás, el Code node de abajo igual lo parsea a mano.
 
-Después del AI Agent, un nodo **Code** (JavaScript) que parsea el marcador:
+### 3. Code node — separar texto y resolver la ruta del PDF
+
+Después del AI Agent, un nodo **Code** (JavaScript) que lee el JSON y resuelve la
+**ruta en disco** del PDF a partir de la clave. (Setup: n8n y el MCP en el mismo
+VPS, WaSender envía por binario → leemos el archivo del disco, sin URL pública.)
 
 ```js
-const salida = $json.output ?? $json.text ?? "";
-const re = /\[\[ENVIAR_PDF:\s*([^\]]+?)\s*\]\]/i;
-const m = salida.match(re);
+// Salida del AI Agent: puede venir ya parseada (output parser) o como string JSON
+let data = $json.output ?? $json.text ?? $json;
+if (typeof data === "string") {
+  try { data = JSON.parse(data); } catch (e) { data = { respuesta: data, pdf: "" }; }
+}
 
-const archivo = m ? m[1].trim() : "";
-const textoLimpio = salida.replace(re, "").trim();
+const texto = (data.respuesta ?? "").trim();
+const clave = (data.pdf ?? "").trim();
 
-// Base pública de los PDFs (igual que PRESUPUESTOS_BASE_URL en el .env del MCP)
-const BASE = "https://tu-dominio.com/presupuestos";
+// Mapeo clave de presupuesto → nombre de archivo (debe coincidir con productos.yaml)
+const ARCHIVOS = {
+  rrss_pauta:     "presupuesto-rrss-pauta.pdf",
+  rrss_crm_pauta: "presupuesto-rrss-crm-pauta.pdf",
+  concilia:       "presupuesto-concilia.pdf",
+  turneria:       "presupuesto-turneria.pdf",
+};
+const archivo = ARCHIVOS[clave] ?? "";
+
+// Carpeta donde n8n VE los PDFs.
+//  - n8n nativo (sin Docker): la ruta real en el VPS.
+//  - n8n en Docker: la ruta DENTRO del contenedor (la que montaste como volumen).
+const PDF_DIR = "/data/presupuestos";   // ajustá según tu instalación
 
 return [{
   json: {
     telefono: $json.telefono,
-    texto: textoLimpio,
+    texto,
     enviar_pdf: archivo !== "",
+    pdf_clave: clave,
     pdf_archivo: archivo,
-    pdf_url: archivo ? `${BASE}/${archivo}` : "",
+    pdf_path: archivo ? `${PDF_DIR}/${archivo}` : "",
   },
 }];
 ```
 
-### 4. Envío por WaSender
+### 4. Envío por WaSender (texto + PDF binario)
 - **4a — Texto**: nodo WaSender "send message" con `telefono` y `texto`.
-- **4b — Documento**: un nodo **IF** con condición `enviar_pdf == true`; por la
-  rama true, un WaSender "send document/media" usando `pdf_url` (y `pdf_archivo`
-  como nombre de archivo).
+- **4b — PDF**: detrás de un nodo **IF** con condición `enviar_pdf == true`:
+  1. **Read/Write Files from Disk** → operación **Read**, *File(s) Selector* =
+     `{{ $json.pdf_path }}`. Esto carga el PDF como **binario** (propiedad `data`).
+  2. **WaSender** en modo **documento/binario**: tomá el binario del paso anterior
+     (`data`) y mandalo a `telefono`, con `pdf_archivo` como nombre del archivo.
 
-> WaSender necesita una **URL pública** del PDF. Por eso el MCP sirve los PDFs en
-> `/presupuestos/<archivo>` (ruta pública, sin auth). Asegurate de que el dominio
-> apunte al VPS y que `PRESUPUESTOS_BASE_URL` coincida con `BASE` del Code node.
+> **Importante (Docker):** si n8n corre en contenedor, montá la carpeta de PDFs
+> como volumen para que el nodo "Read Files from Disk" la vea. En tu
+> `docker-compose.yml` / `docker run`, agregá:
+> ```
+> -v /opt/mcp-consultoria/data/presupuestos:/data/presupuestos:ro
+> ```
+> y usá `PDF_DIR = "/data/presupuestos"`. Si n8n es nativo (sin Docker), poné la
+> ruta real, p. ej. `PDF_DIR = "/opt/mcp-consultoria/data/presupuestos"`.
+
+> **Acceso a archivos en n8n:** si tenés seteada la variable
+> `N8N_RESTRICT_FILE_ACCESS_TO`, agregá la carpeta de PDFs a esa lista; si no, el
+> nodo "Read Files from Disk" no podrá leerlos.
 
 ## Alternativas para hostear los PDFs
-1. **VPS (recomendado, ya incluido)**: dejá los PDFs en `data/presupuestos/`; el
-   server los sirve en `/presupuestos/`. Cero infra extra.
-2. **Google Drive / Storage**: subí los PDFs y mapeá el nombre de archivo a su
-   link de descarga directa en el Code node. Útil si no querés exponerlos en el VPS.
-3. **Binario en n8n**: un nodo *HTTP Request* baja el PDF desde la URL y lo pasa
-   como binario al nodo de WaSender (si tu versión de WaSender pide binario en vez
-   de URL).
+1. **Disco local del VPS (tu caso, recomendado)**: PDFs en
+   `data/presupuestos/`, n8n los lee con "Read Files from Disk" y WaSender los
+   manda como binario. Sin exponer nada público.
+2. **Por URL pública**: el MCP también los sirve en `/presupuestos/<archivo>`
+   (setear `PRESUPUESTOS_BASE_URL`). Útil si WaSender enviara por URL en vez de
+   binario.
+3. **Google Drive / Storage**: subir los PDFs y mapear cada clave a su link de
+   descarga directa.
 
 ## Tips
 - El MCP es **sin estado**: no guarda conversaciones ni leads. El contexto lo
